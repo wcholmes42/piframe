@@ -221,14 +221,17 @@
             }
         }
         
-        function initSlideshow() {
-            // Preload first two images
-            createSlide(0);
+        async function initSlideshow() {
+            // Preload first three images
+            await createSlide(0);
             if (photos.length > 1) {
-                createSlide(1);
+                createSlide(1); // Start loading second image
             }
-            
-            // Start slideshow
+            if (photos.length > 2) {
+                createSlide(2); // Start loading third image
+            }
+
+            // Start slideshow after first image is loaded
             setTimeout(() => {
                 showSlide(0);
                 startSlideshow();
@@ -239,20 +242,30 @@
             const slide = document.createElement('div');
             slide.className = 'slide';
             slide.dataset.index = index;
-            
+
             const img = document.createElement('img');
-            img.src = `/photos/${encodeURIComponent(photos[index])}`;
-            img.onerror = () => nextSlide();
-            
-            slide.appendChild(img);
-            container.appendChild(slide);
-            return slide;
+
+            // Preload image before adding to DOM
+            return new Promise((resolve, reject) => {
+                img.onload = () => {
+                    slide.appendChild(img);
+                    container.appendChild(slide);
+                    resolve(slide);
+                };
+                img.onerror = () => {
+                    console.error('Failed to load image:', photos[index]);
+                    reject();
+                };
+                img.src = `/photos/${encodeURIComponent(photos[index])}`;
+            });
         }
         
-        function showSlide(index) {
+        async function showSlide(index) {
             // Get the new slide (create if needed)
             let slide = container.querySelector(`[data-index="${index}"]`);
-            if (!slide) slide = createSlide(index);
+            if (!slide) {
+                slide = await createSlide(index);
+            }
 
             // Set z-index for proper layering (new slide on top)
             const slides = container.querySelectorAll('.slide');
@@ -279,10 +292,15 @@
                 });
             }, config.transitionDuration);
 
-            // Preload next image
+            // Preload next two images
             const nextIndex = (index + 1) % photos.length;
+            const nextNextIndex = (index + 2) % photos.length;
+
             if (!container.querySelector(`[data-index="${nextIndex}"]`)) {
                 createSlide(nextIndex);
+            }
+            if (!container.querySelector(`[data-index="${nextNextIndex}"]`)) {
+                createSlide(nextNextIndex);
             }
         }
         
@@ -300,22 +318,29 @@
             setTimeout(() => status.classList.remove('show'), 3000);
         }
 
-        // Cleanup old slides to prevent memory leak
+        // Cleanup old slides to prevent memory leak - keep more slides cached
         function cleanupSlides() {
             const slides = container.querySelectorAll('.slide');
-            if (slides.length > 3) {
-                slides.forEach((slide, index) => {
-                    if (!slide.classList.contains('active') &&
-                        slide.dataset.index != currentIndex &&
-                        slide.dataset.index != ((currentIndex + 1) % photos.length)) {
+            if (slides.length > 5) {
+                slides.forEach((slide) => {
+                    const slideIndex = parseInt(slide.dataset.index);
+                    const currentIdx = currentIndex;
+                    const nextIdx = (currentIndex + 1) % photos.length;
+                    const nextNextIdx = (currentIndex + 2) % photos.length;
+
+                    // Keep current and next 2 slides
+                    if (slideIndex !== currentIdx &&
+                        slideIndex !== nextIdx &&
+                        slideIndex !== nextNextIdx &&
+                        !slide.classList.contains('active')) {
                         slide.remove();
                     }
                 });
             }
         }
 
-        // Clean up every minute
-        setInterval(cleanupSlides, 60000);
+        // Clean up every 2 minutes
+        setInterval(cleanupSlides, 120000);
 
         // Initialize on page load
         loadPhotos();
