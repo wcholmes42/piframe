@@ -16,7 +16,7 @@ def load_config():
         'delay': 10,
         'randomize': False,
         'recursive': True,
-        'transition_duration': 6.0
+        'transition_duration': 20.0
     }
 
 def save_config(config):
