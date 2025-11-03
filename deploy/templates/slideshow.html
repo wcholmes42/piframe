@@ -26,8 +26,6 @@
             width: 1920px;
             height: 1080px;
             background: #000;
-            perspective: 1000px;
-            overflow: hidden;
         }
 
         .slide {
@@ -40,21 +38,13 @@
             align-items: center;
             justify-content: center;
             background: #000;
-            transform: translate3d(-100%, 0, 0);
-            transition: transform 20s linear;
-            will-change: transform;
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
         }
 
         .slide.active {
-            transform: translate3d(0, 0, 0);
+            opacity: 1;
             z-index: 2;
-        }
-
-        .slide.slide-out {
-            transform: translate3d(100%, 0, 0);
-            z-index: 1;
         }
 
         .slide img {
@@ -178,25 +168,16 @@
                 slide = await createSlide(index);
             }
 
-            // Find current active slide and mark it to slide out
+            // Activate the new slide (will cross-fade)
             const slides = container.querySelectorAll('.slide');
-            slides.forEach(s => {
-                if (s.classList.contains('active') && s !== slide) {
-                    s.classList.add('slide-out');
-                    s.classList.remove('active');
-                }
-            });
-
-            // Activate the new slide (will slide in from left)
-            slide.classList.remove('slide-out');
             slide.classList.add('active');
             currentIndex = index;
 
-            // After transition completes, reset old slides
+            // After transition completes, remove active from old slides
             setTimeout(() => {
                 slides.forEach(s => {
                     if (s !== slide) {
-                        s.classList.remove('active', 'slide-out');
+                        s.classList.remove('active');
                     }
                 });
             }, config.transitionDuration);

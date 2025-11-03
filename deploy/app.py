@@ -13,10 +13,10 @@ def load_config():
         with open(CONFIG_FILE, 'r') as f:
             return json.load(f)
     return {
-        'delay': 30,
+        'delay': 10,
         'randomize': False,
         'recursive': True,
-        'transition_duration': 20.0
+        'transition_duration': 1.0
     }
 
 def save_config(config):
