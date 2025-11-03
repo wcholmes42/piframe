@@ -53,106 +53,13 @@
             object-position: center;
         }
 
-        /* Cross-fade transition - ultra smooth and slow */
+        /* Cross-fade transition - smooth and slow */
         .slide {
             transition: opacity 6s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         .slide.active {
             transition: opacity 6s cubic-bezier(0.4, 0.0, 0.2, 1);
-        }
-
-        /* Zoom effect on images during display */
-        .transition-zoom .slide.active img {
-            animation: zoom-in 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
-        }
-
-        @keyframes zoom-in {
-            0% {
-                transform: scale(1);
-            }
-            100% {
-                transform: scale(1.075);
-            }
-        }
-
-        /* Fade with subtle zoom */
-        .transition-fade .slide.active img {
-            animation: fade-zoom 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
-        }
-
-        @keyframes fade-zoom {
-            0% {
-                transform: scale(1);
-            }
-            100% {
-                transform: scale(1.04);
-            }
-        }
-
-        /* Slide transition with cross-fade */
-        .transition-slide .slide.active img {
-            animation: slide-zoom 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
-        }
-
-        @keyframes slide-zoom {
-            0% {
-                transform: scale(1.025) translateX(-1%);
-            }
-            100% {
-                transform: scale(1.075) translateX(1%);
-            }
-        }
-
-        /* Pan effect - zoom in then pan left and right */
-        .transition-pan .slide.active img {
-            animation: pan-effect 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
-        }
-
-        @keyframes pan-effect {
-            0% {
-                transform: scale(1) translateX(0);
-            }
-            25% {
-                transform: scale(1.05) translateX(0);
-            }
-            50% {
-                transform: scale(1.05) translateX(-3%);
-            }
-            75% {
-                transform: scale(1.05) translateX(3%);
-            }
-            100% {
-                transform: scale(1.05) translateX(0);
-            }
-        }
-
-        /* Ken Burns effect - enhanced for full-screen */
-        .kenburns .slide.active img {
-            animation: kenburns 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
-        }
-
-        @keyframes kenburns {
-            0% {
-                transform: scale(1) translate(0, 0);
-            }
-            100% {
-                transform: scale(1.075) translate(-1.5%, -1.5%);
-            }
-        }
-
-        /* Alternate Ken Burns animations */
-        .kenburns .slide:nth-child(even).active img {
-            animation: kenburns-alt 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
-        }
-
-        @keyframes kenburns-alt {
-            0% {
-                transform: scale(1.075) translate(1.5%, 1.5%);
-            }
-            100% {
-                transform: scale(1) translate(0, 0);
-            }
         }
         
         /* Status overlay (optional) */
@@ -176,7 +83,7 @@
     </style>
 </head>
 <body style="margin:0;padding:0;background:#000;width:1920px;height:1080px;overflow:hidden">
-    <div class="slideshow-container transition-{{ config.transition }}{% if config.kenburns %} kenburns{% endif %}">
+    <div class="slideshow-container">
     </div>
     <div class="status" id="status"></div>
     
@@ -184,9 +91,7 @@
         const config = {
             delay: {{ config.delay }} * 1000,
             randomize: {{ 'true' if config.randomize else 'false' }},
-            transition: '{{ config.transition }}',
-            transitionDuration: {{ config.transition_duration }} * 1000,
-            kenburns: {{ 'true' if config.kenburns else 'false' }}
+            transitionDuration: {{ config.transition_duration }} * 1000
         };
         
         let photos = [];

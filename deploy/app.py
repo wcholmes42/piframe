@@ -16,9 +16,7 @@ def load_config():
         'delay': 10,
         'randomize': False,
         'recursive': True,
-        'transition': 'fade',
-        'transition_duration': 6.0,
-        'kenburns': True
+        'transition_duration': 6.0
     }
 
 def save_config(config):
