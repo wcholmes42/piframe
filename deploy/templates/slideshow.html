@@ -26,8 +26,10 @@
             width: 1920px;
             height: 1080px;
             background: #000;
+            perspective: 1000px;
+            overflow: hidden;
         }
-        
+
         .slide {
             position: absolute;
             top: 0;
@@ -38,17 +40,20 @@
             align-items: center;
             justify-content: center;
             background: #000;
-            transform: translateX(-100%);
+            transform: translate3d(-100%, 0, 0);
             transition: transform 6s cubic-bezier(0.4, 0.0, 0.2, 1);
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         .slide.active {
-            transform: translateX(0);
+            transform: translate3d(0, 0, 0);
             z-index: 2;
         }
 
         .slide.slide-out {
-            transform: translateX(100%);
+            transform: translate3d(100%, 0, 0);
             z-index: 1;
         }
 
