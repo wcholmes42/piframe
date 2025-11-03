@@ -38,6 +38,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            background: #000;
         }
         
         .slide.active {
@@ -222,20 +223,23 @@
         }
         
         async function initSlideshow() {
-            // Preload first three images
+            // Preload first three images - wait for first to fully load
             await createSlide(0);
+
+            // Wait a bit to ensure image is rendered
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Start loading additional images
             if (photos.length > 1) {
-                createSlide(1); // Start loading second image
+                createSlide(1);
             }
             if (photos.length > 2) {
-                createSlide(2); // Start loading third image
+                createSlide(2);
             }
 
-            // Start slideshow after first image is loaded
-            setTimeout(() => {
-                showSlide(0);
-                startSlideshow();
-            }, 100);
+            // Start slideshow after first image is loaded and rendered
+            showSlide(0);
+            startSlideshow();
         }
         
         function createSlide(index) {
