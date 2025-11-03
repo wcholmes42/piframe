@@ -29,7 +29,7 @@ Raspberry Pi 5 powered digital picture frame with automatic photo optimization, 
 3. Boot Pi and SSH in
 4. Run installation:
 ```bash
-curl -sSL https://raw.githubusercontent.com/Razlex42/piframe/main/pi/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/wcholmes42/piframe/main/pi/install.sh | bash
 ```
 
 ### On Unraid
@@ -37,12 +37,12 @@ curl -sSL https://raw.githubusercontent.com/Razlex42/piframe/main/pi/install.sh 
 1. SSH to Unraid server
 2. Run optimizer setup:
 ```bash
-curl -sSL https://raw.githubusercontent.com/Razlex42/piframe/main/unraid/setup-optimizer.sh | bash
+curl -sSL https://raw.githubusercontent.com/wcholmes42/piframe/main/unraid/setup-optimizer.sh | bash
 ```
 
 3. Run watcher setup:
 ```bash
-curl -sSL https://raw.githubusercontent.com/Razlex42/piframe/main/unraid/setup-watcher.sh | bash
+curl -sSL https://raw.githubusercontent.com/wcholmes42/piframe/main/unraid/setup-watcher.sh | bash
 ```
 
 ## Configuration
