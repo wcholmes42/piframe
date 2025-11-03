@@ -70,9 +70,9 @@ def config():
 @app.route('/api/display/<action>')
 def display_action(action):
     if action == 'on':
-        subprocess.run(['vcgencmd', 'display_power', '1'])
+        subprocess.run(['display-on'])
     elif action == 'off':
-        subprocess.run(['vcgencmd', 'display_power', '0'])
+        subprocess.run(['display-off'])
     return jsonify({'status': 'ok'})
 
 @app.route('/api/reoptimize')
