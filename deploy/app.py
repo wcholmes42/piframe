@@ -17,7 +17,7 @@ def load_config():
         'randomize': False,
         'recursive': True,
         'transition': 'fade',
-        'transition_duration': 3.0,
+        'transition_duration': 6.0,
         'kenburns': True
     }
 

@@ -52,18 +52,18 @@
             object-position: center;
         }
 
-        /* Cross-fade transition - smooth and slow */
+        /* Cross-fade transition - ultra smooth and slow */
         .slide {
-            transition: opacity 3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            transition: opacity 6s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         .slide.active {
-            transition: opacity 3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            transition: opacity 6s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
 
         /* Zoom effect on images during display */
         .transition-zoom .slide.active img {
-            animation: zoom-in 20s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+            animation: zoom-in 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
         }
 
         @keyframes zoom-in {
@@ -71,13 +71,13 @@
                 transform: scale(1);
             }
             100% {
-                transform: scale(1.15);
+                transform: scale(1.075);
             }
         }
 
         /* Fade with subtle zoom */
         .transition-fade .slide.active img {
-            animation: fade-zoom 20s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+            animation: fade-zoom 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
         }
 
         @keyframes fade-zoom {
@@ -85,27 +85,50 @@
                 transform: scale(1);
             }
             100% {
-                transform: scale(1.08);
+                transform: scale(1.04);
             }
         }
 
         /* Slide transition with cross-fade */
         .transition-slide .slide.active img {
-            animation: slide-zoom 20s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+            animation: slide-zoom 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
         }
 
         @keyframes slide-zoom {
             0% {
-                transform: scale(1.05) translateX(-2%);
+                transform: scale(1.025) translateX(-1%);
             }
             100% {
-                transform: scale(1.15) translateX(2%);
+                transform: scale(1.075) translateX(1%);
+            }
+        }
+
+        /* Pan effect - zoom in then pan left and right */
+        .transition-pan .slide.active img {
+            animation: pan-effect 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        }
+
+        @keyframes pan-effect {
+            0% {
+                transform: scale(1) translateX(0);
+            }
+            25% {
+                transform: scale(1.05) translateX(0);
+            }
+            50% {
+                transform: scale(1.05) translateX(-3%);
+            }
+            75% {
+                transform: scale(1.05) translateX(3%);
+            }
+            100% {
+                transform: scale(1.05) translateX(0);
             }
         }
 
         /* Ken Burns effect - enhanced for full-screen */
         .kenburns .slide.active img {
-            animation: kenburns 20s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+            animation: kenburns 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
         }
 
         @keyframes kenburns {
@@ -113,18 +136,18 @@
                 transform: scale(1) translate(0, 0);
             }
             100% {
-                transform: scale(1.15) translate(-3%, -3%);
+                transform: scale(1.075) translate(-1.5%, -1.5%);
             }
         }
 
         /* Alternate Ken Burns animations */
         .kenburns .slide:nth-child(even).active img {
-            animation: kenburns-alt 20s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+            animation: kenburns-alt 40s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
         }
 
         @keyframes kenburns-alt {
             0% {
-                transform: scale(1.15) translate(3%, 3%);
+                transform: scale(1.075) translate(1.5%, 1.5%);
             }
             100% {
                 transform: scale(1) translate(0, 0);
