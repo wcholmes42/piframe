@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PiFrame Slideshow</title>
+    <meta charset="UTF-8">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        .slideshow-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+        }
+        
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .slide.active {
+            opacity: 1;
+            z-index: 2;
+        }
+        
+        .slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        
+        /* Fade transition */
+        .transition-fade .slide.active {
+            transition: opacity 1.5s ease-in-out;
+        }
+        
+        /* Slide transition */
+        .transition-slide .slide {
+            transform: translateX(100%);
+            transition: transform 1.5s ease-in-out, opacity 1.5s ease-in-out;
+        }
+        
+        .transition-slide .slide.active {
+            transform: translateX(0);
+        }
+        
+        /* Zoom transition */
+        .transition-zoom .slide {
+            transform: scale(0.8);
+            transition: transform 1.5s ease-in-out, opacity 1.5s ease-in-out;
+        }
+        
+        .transition-zoom .slide.active {
+            transform: scale(1);
+        }
+        
+        /* Ken Burns effect - slow zoom/pan */
+        .kenburns .slide.active img {
+            animation: kenburns 10s ease-in-out;
+        }
+        
+        @keyframes kenburns {
+            0% {
+                transform: scale(1) translate(0, 0);
+            }
+            100% {
+                transform: scale(1.1) translate(-2%, -2%);
+            }
+        }
+        
+        /* Alternate Ken Burns animations */
+        .slide:nth-child(even).active img {
+            animation: kenburns-alt 10s ease-in-out;
+        }
+        
+        @keyframes kenburns-alt {
+            0% {
+                transform: scale(1.1) translate(2%, 2%);
+            }
+            100% {
+                transform: scale(1) translate(0, 0);
+            }
+        }
+        
+        /* Status overlay (optional) */
+        .status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            color: #fff;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .status.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="slideshow-container transition-{{ config.transition }}{% if config.kenburns %} kenburns{% endif %}">
+    </div>
+    <div class="status" id="status"></div>
+    
+    <script>
+        const config = {
+            delay: {{ config.delay }} * 1000,
+            randomize: {{ 'true' if config.randomize else 'false' }},
+            transition: '{{ config.transition }}',
+            transitionDuration: {{ config.transition_duration }} * 1000,
+            kenburns: {{ 'true' if config.kenburns else 'false' }}
+        };
+        
+        let photos = [];
+        let currentIndex = 0;
+        let slideInterval;
+        const container = document.querySelector('.slideshow-container');
+        const status = document.getElementById('status');
+        
+        // Fetch photo list
+        async function loadPhotos() {
+            try {
+                const response = await fetch('/api/photos');
+                photos = await response.json();
+                
+                if (config.randomize) {
+                    shuffleArray(photos);
+                }
+                
+                if (photos.length > 0) {
+                    initSlideshow();
+                } else {
+                    showStatus('No photos found');
+                }
+            } catch (error) {
+                showStatus('Error loading photos: ' + error.message);
+            }
+        }
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+        
+        function initSlideshow() {
+            // Preload first two images
+            createSlide(0);
+            if (photos.length > 1) {
+                createSlide(1);
+            }
+            
+            // Start slideshow
+            setTimeout(() => {
+                showSlide(0);
+                startSlideshow();
+            }, 100);
+        }
+        
+        function createSlide(index) {
+            const slide = document.createElement('div');
+            slide.className = 'slide';
+            slide.dataset.index = index;
+            
+            const img = document.createElement('img');
+            img.src = `/photos/${encodeURIComponent(photos[index])}`;
+            img.onerror = () => nextSlide();
+            
+            slide.appendChild(img);
+            container.appendChild(slide);
+            return slide;
+        }
+        
+        function showSlide(index) {
+            const slides = container.querySelectorAll('.slide');
+            slides.forEach(s => s.classList.remove('active'));
+            
+            let slide = container.querySelector(`[data-index="${index}"]`);
+            if (!slide) slide = createSlide(index);
+            
+            slide.classList.add('active');
+            currentIndex = index;
+            
+            const nextIndex = (index + 1) % photos.length;
+            if (!container.querySelector(`[data-index="${nextIndex}"]`)) {
+                createSlide(nextIndex);
+            }
+        }
+        
+        function nextSlide() {
+            showSlide((currentIndex + 1) % photos.length);
+        }
+
+        function startSlideshow() {
+            slideInterval = setInterval(nextSlide, config.delay);
+        }
+
+        function showStatus(message) {
+            status.textContent = message;
+            status.classList.add('show');
+            setTimeout(() => status.classList.remove('show'), 3000);
+        }
+
+        // Cleanup old slides to prevent memory leak
+        function cleanupSlides() {
+            const slides = container.querySelectorAll('.slide');
+            if (slides.length > 3) {
+                slides.forEach((slide, index) => {
+                    if (!slide.classList.contains('active') &&
+                        slide.dataset.index != currentIndex &&
+                        slide.dataset.index != ((currentIndex + 1) % photos.length)) {
+                        slide.remove();
+                    }
+                });
+            }
+        }
+
+        // Clean up every minute
+        setInterval(cleanupSlides, 60000);
+
+        // Initialize on page load
+        loadPhotos();
+    </script>
+</body>
+</html>

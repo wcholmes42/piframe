@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PiFrame Control Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            color: #fff;
+        }
+
+        .card {
+            background: #2a2a2a;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .card h2 {
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: 1.3em;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .status-item {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .status-label {
+            color: #888;
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .status-value {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #4CAF50;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1em;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        button.secondary {
+            background: #555;
+        }
+
+        button.secondary:hover {
+            background: #666;
+        }
+
+        button.danger {
+            background: #f44336;
+        }
+
+        button.danger:hover {
+            background: #da190b;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .link-button {
+            display: inline-block;
+            background: #2196F3;
+            color: white;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .link-button:hover {
+            background: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PiFrame Control Panel</h1>
+
+        <div class="card">
+            <h2>Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <div class="status-label">Photo Count</div>
+                    <div class="status-value" id="photoCount">Loading...</div>
+                </div>
+                <div class="status-item">
+                    <div class="status-label">Display Status</div>
+                    <div class="status-value" id="displayStatus">Unknown</div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button onclick="toggleDisplay()">Toggle Display</button>
+                <button class="secondary" onclick="reoptimize()">Re-optimize Photos</button>
+                <a href="/slideshow" class="link-button" target="_blank">Open Slideshow</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Slideshow Settings</h2>
+            <form id="configForm">
+                <div class="form-group">
+                    <label for="delay">Slide Delay (seconds)</label>
+                    <input type="number" id="delay" name="delay" min="1" max="300" value="{{ config.delay }}">
+                </div>
+
+                <div class="form-group">
+                    <label for="transition">Transition Effect</label>
+                    <select id="transition" name="transition">
+                        <option value="fade" {% if config.transition == 'fade' %}selected{% endif %}>Fade</option>
+                        <option value="slide" {% if config.transition == 'slide' %}selected{% endif %}>Slide</option>
+                        <option value="zoom" {% if config.transition == 'zoom' %}selected{% endif %}>Zoom</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="transitionDuration">Transition Duration (seconds)</label>
+                    <input type="number" id="transitionDuration" name="transition_duration" min="0.5" max="5" step="0.1" value="{{ config.transition_duration }}">
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="randomize" name="randomize" {% if config.randomize %}checked{% endif %}>
+                        <label for="randomize">Random Order</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="recursive" name="recursive" {% if config.recursive %}checked{% endif %}>
+                        <label for="recursive">Include Subfolders</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="kenburns" name="kenburns" {% if config.kenburns %}checked{% endif %}>
+                        <label for="kenburns">Ken Burns Effect (Slow Zoom/Pan)</label>
+                    </div>
+                </div>
+
+                <button type="submit">Save Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        async function loadStatus() {
+            try {
+                const response = await fetch('/api/photos');
+                const photos = await response.json();
+                document.getElementById('photoCount').textContent = photos.length;
+            } catch (error) {
+                document.getElementById('photoCount').textContent = 'Error';
+            }
+        }
+
+        async function toggleDisplay() {
+            try {
+                const status = document.getElementById('displayStatus').textContent;
+                const action = status === 'ON' ? 'off' : 'on';
+                await fetch(`/api/display/${action}`);
+                document.getElementById('displayStatus').textContent = action.toUpperCase();
+                showToast(`Display turned ${action}`);
+            } catch (error) {
+                showToast('Error toggling display');
+            }
+        }
+
+        async function reoptimize() {
+            try {
+                await fetch('/api/reoptimize');
+                showToast('Re-optimization started on Unraid');
+            } catch (error) {
+                showToast('Error triggering re-optimization');
+            }
+        }
+
+        document.getElementById('configForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                delay: parseInt(document.getElementById('delay').value),
+                transition: document.getElementById('transition').value,
+                transition_duration: parseFloat(document.getElementById('transitionDuration').value),
+                randomize: document.getElementById('randomize').checked,
+                recursive: document.getElementById('recursive').checked,
+                kenburns: document.getElementById('kenburns').checked
+            };
+
+            try {
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    showToast('Settings saved! Reload slideshow to apply changes.');
+                } else {
+                    showToast('Error saving settings');
+                }
+            } catch (error) {
+                showToast('Error saving settings');
+            }
+        });
+
+        // Load status on page load
+        loadStatus();
+        document.getElementById('displayStatus').textContent = 'ON';
+
+        // Refresh photo count every 30 seconds
+        setInterval(loadStatus, 30000);
+    </script>
+</body>
+</html>
