@@ -302,6 +302,15 @@
             if (!container.querySelector(`[data-index="${nextNextIndex}"]`)) {
                 createSlide(nextNextIndex);
             }
+
+            // When near the end, preload first images for smooth loop
+            if (index >= photos.length - 3) {
+                for (let i = 0; i < 3; i++) {
+                    if (!container.querySelector(`[data-index="${i}"]`)) {
+                        createSlide(i);
+                    }
+                }
+            }
         }
         
         function nextSlide() {
@@ -321,12 +330,17 @@
         // Cleanup old slides to prevent memory leak - keep more slides cached
         function cleanupSlides() {
             const slides = container.querySelectorAll('.slide');
-            if (slides.length > 5) {
+            if (slides.length > 8) {
                 slides.forEach((slide) => {
                     const slideIndex = parseInt(slide.dataset.index);
                     const currentIdx = currentIndex;
                     const nextIdx = (currentIndex + 1) % photos.length;
                     const nextNextIdx = (currentIndex + 2) % photos.length;
+
+                    // Always keep first 3 slides for smooth looping
+                    if (slideIndex < 3) {
+                        return;
+                    }
 
                     // Keep current and next 2 slides
                     if (slideIndex !== currentIdx &&
@@ -339,8 +353,8 @@
             }
         }
 
-        // Clean up every 2 minutes
-        setInterval(cleanupSlides, 120000);
+        // Clean up every 3 minutes
+        setInterval(cleanupSlides, 180000);
 
         // Initialize on page load
         loadPhotos();
