@@ -201,7 +201,6 @@
             </div>
             <div class="button-group">
                 <button onclick="reloadSlideshow()">Reload Slideshow</button>
-                <button class="secondary" onclick="reoptimize()">Re-optimize Photos</button>
                 <a href="/slideshow" class="link-button" target="_blank">Open Slideshow</a>
             </div>
         </div>
@@ -282,15 +281,6 @@
                 document.getElementById('photoCount').textContent = photos.length;
             } catch (error) {
                 document.getElementById('photoCount').textContent = 'Error';
-            }
-        }
-
-        async function reoptimize() {
-            try {
-                await fetch('/api/reoptimize');
-                showToast('Re-optimization started on Unraid');
-            } catch (error) {
-                showToast('Error triggering re-optimization');
             }
         }
 

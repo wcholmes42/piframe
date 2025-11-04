@@ -96,10 +96,5 @@ def overlay():
             os.remove(OVERLAY_FILE)
         return jsonify({'status': 'ok'})
 
-@app.route('/api/reoptimize')
-def reoptimize():
-    subprocess.run(['ssh', 'root@192.168.68.42', 'docker restart piframe-optimizer'])
-    return jsonify({'status': 'ok'})
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
