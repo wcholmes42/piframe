@@ -28,7 +28,7 @@ for img in "$SOURCE"/*.{jpg,jpeg,png,JPG,JPEG,PNG}; do
         filename=$(basename "$img")
         # Skip if already optimized
         if [ ! -f "$OUTPUT/$filename" ]; then
-            convert "$img" -resize 1920x1080 -gravity center -background black -extent 1920x1080 "$OUTPUT/$filename"
+            convert "$img" -resize 1920x1080^ -gravity center -extent 1920x1080 "$OUTPUT/$filename"
             echo "Optimized: $filename"
         fi
     fi

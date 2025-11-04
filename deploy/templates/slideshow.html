@@ -203,12 +203,22 @@
                 slide = await createSlide(index);
             }
 
-            // Activate the new slide (will cross-fade)
             const slides = container.querySelectorAll('.slide');
+
+            // Step 1: Fade out current slide to black
+            slides.forEach(s => {
+                if (s.classList.contains('active')) {
+                    s.classList.remove('active');
+                }
+            });
+
+            // Step 2: Wait for fade-out to complete, then fade in new slide
+            await new Promise(resolve => setTimeout(resolve, config.transitionDuration));
+
             slide.classList.add('active');
             currentIndex = index;
 
-            // After transition completes, remove active from old slides
+            // After fade-in completes, cleanup old slides
             setTimeout(() => {
                 slides.forEach(s => {
                     if (s !== slide) {
