@@ -72,12 +72,43 @@
         .status.show {
             opacity: 1;
         }
+
+        /* Text overlay styles */
+        .text-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 1920px;
+            height: 1080px;
+            background: #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 100px;
+        }
+
+        .text-overlay.active {
+            display: flex;
+        }
+
+        .text-overlay-content {
+            color: #fff;
+            text-align: center;
+            font-weight: bold;
+            line-height: 1.4;
+            max-width: 100%;
+            word-wrap: break-word;
+        }
     </style>
 </head>
 <body style="margin:0;padding:0;background:#000;width:1920px;height:1080px;overflow:hidden">
     <div class="slideshow-container">
     </div>
     <div class="status" id="status"></div>
+    <div class="text-overlay" id="textOverlay">
+        <div class="text-overlay-content" id="overlayContent"></div>
+    </div>
     
     <script>
         const config = {
@@ -217,6 +248,66 @@
             setTimeout(() => status.classList.remove('show'), 3000);
         }
 
+        // Text overlay management
+        async function checkOverlay() {
+            try {
+                const response = await fetch('/api/overlay');
+                const data = await response.json();
+
+                if (!data.text) {
+                    document.getElementById('textOverlay').classList.remove('active');
+                    return;
+                }
+
+                // Check if we should display based on schedule
+                const now = new Date();
+                const currentTime = now.getHours() * 60 + now.getMinutes();
+
+                let shouldDisplay = true;
+
+                if (data.startTime && data.endTime) {
+                    const [startH, startM] = data.startTime.split(':').map(Number);
+                    const [endH, endM] = data.endTime.split(':').map(Number);
+                    const startMinutes = startH * 60 + startM;
+                    const endMinutes = endH * 60 + endM;
+
+                    if (startMinutes <= endMinutes) {
+                        // Normal case: start and end on same day
+                        shouldDisplay = currentTime >= startMinutes && currentTime <= endMinutes;
+                    } else {
+                        // Crosses midnight
+                        shouldDisplay = currentTime >= startMinutes || currentTime <= endMinutes;
+                    }
+                }
+
+                if (shouldDisplay) {
+                    // Auto-size font based on text length
+                    const textLength = data.text.length;
+                    let fontSize;
+                    if (textLength < 50) {
+                        fontSize = '120px';
+                    } else if (textLength < 100) {
+                        fontSize = '90px';
+                    } else if (textLength < 200) {
+                        fontSize = '70px';
+                    } else if (textLength < 400) {
+                        fontSize = '50px';
+                    } else {
+                        fontSize = '35px';
+                    }
+
+                    const content = document.getElementById('overlayContent');
+                    content.textContent = data.text;
+                    content.style.fontSize = fontSize;
+                    document.getElementById('textOverlay').classList.add('active');
+                } else {
+                    document.getElementById('textOverlay').classList.remove('active');
+                }
+            } catch (error) {
+                console.error('Failed to check overlay:', error);
+            }
+        }
+
         // Cleanup old slides to prevent memory leak - keep more slides cached
         function cleanupSlides() {
             const slides = container.querySelectorAll('.slide');
@@ -245,6 +336,10 @@
 
         // Clean up every 3 minutes
         setInterval(cleanupSlides, 180000);
+
+        // Check overlay every 5 seconds
+        setInterval(checkOverlay, 5000);
+        checkOverlay(); // Check immediately on load
 
         // Initialize on page load
         loadPhotos();

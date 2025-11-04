@@ -200,8 +200,29 @@
                 </div>
             </div>
             <div class="button-group">
+                <button onclick="reloadSlideshow()">Reload Slideshow</button>
                 <button class="secondary" onclick="reoptimize()">Re-optimize Photos</button>
                 <a href="/slideshow" class="link-button" target="_blank">Open Slideshow</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Text Overlay</h2>
+            <div class="form-group">
+                <label for="overlayText">Message Text</label>
+                <textarea id="overlayText" rows="4" style="width:100%;padding:12px;background:#333;border:1px solid #444;border-radius:6px;color:#fff;font-size:1em;font-family:inherit;resize:vertical;"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="startTime">Start Time (HH:MM, 24-hour format)</label>
+                <input type="time" id="startTime" style="width:100%;padding:12px;background:#333;border:1px solid #444;border-radius:6px;color:#fff;font-size:1em;">
+            </div>
+            <div class="form-group">
+                <label for="endTime">End Time (HH:MM, 24-hour format)</label>
+                <input type="time" id="endTime" style="width:100%;padding:12px;background:#333;border:1px solid #444;border-radius:6px;color:#fff;font-size:1em;">
+            </div>
+            <div class="button-group">
+                <button onclick="sendOverlay()">Send to Screen</button>
+                <button class="secondary" onclick="clearOverlay()">Clear</button>
             </div>
         </div>
 
@@ -266,6 +287,65 @@
             }
         }
 
+        async function reloadSlideshow() {
+            try {
+                await fetch('/api/reload');
+                showToast('Slideshow reloaded');
+            } catch (error) {
+                showToast('Error reloading slideshow');
+            }
+        }
+
+        async function sendOverlay() {
+            const text = document.getElementById('overlayText').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+
+            if (!text.trim()) {
+                showToast('Please enter text for the overlay');
+                return;
+            }
+
+            try {
+                await fetch('/api/overlay', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, startTime, endTime })
+                });
+                showToast('Overlay sent to screen');
+            } catch (error) {
+                showToast('Error sending overlay');
+            }
+        }
+
+        async function clearOverlay() {
+            try {
+                await fetch('/api/overlay', {
+                    method: 'DELETE'
+                });
+                document.getElementById('overlayText').value = '';
+                document.getElementById('startTime').value = '';
+                document.getElementById('endTime').value = '';
+                showToast('Overlay cleared');
+            } catch (error) {
+                showToast('Error clearing overlay');
+            }
+        }
+
+        async function loadOverlay() {
+            try {
+                const response = await fetch('/api/overlay');
+                const data = await response.json();
+                if (data.text) {
+                    document.getElementById('overlayText').value = data.text;
+                    document.getElementById('startTime').value = data.startTime || '';
+                    document.getElementById('endTime').value = data.endTime || '';
+                }
+            } catch (error) {
+                // Overlay doesn't exist yet, that's okay
+            }
+        }
+
         document.getElementById('configForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -295,8 +375,9 @@
             }
         });
 
-        // Load status on page load
+        // Load status and overlay on page load
         loadStatus();
+        loadOverlay();
 
         // Refresh photo count every 30 seconds
         setInterval(loadStatus, 30000);

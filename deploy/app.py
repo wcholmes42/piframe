@@ -2,10 +2,12 @@ from flask import Flask, render_template, jsonify, request, send_from_directory
 import os
 import json
 import subprocess
+import time
 
 app = Flask(__name__)
 
 CONFIG_FILE = '/etc/piframe-config.json'
+OVERLAY_FILE = '/tmp/piframe-overlay.json'
 PHOTO_DIR = '/mnt/photos'
 
 def load_config():
@@ -66,6 +68,33 @@ def config():
         save_config(config)
         return jsonify({'status': 'ok'})
     return jsonify(load_config())
+
+@app.route('/api/reload')
+def reload_slideshow():
+    """Trigger slideshow reload by updating a timestamp file"""
+    with open('/tmp/piframe-reload', 'w') as f:
+        f.write(str(time.time()))
+    return jsonify({'status': 'ok'})
+
+@app.route('/api/overlay', methods=['GET', 'POST', 'DELETE'])
+def overlay():
+    """Manage text overlay"""
+    if request.method == 'GET':
+        if os.path.exists(OVERLAY_FILE):
+            with open(OVERLAY_FILE, 'r') as f:
+                return jsonify(json.load(f))
+        return jsonify({})
+
+    elif request.method == 'POST':
+        data = request.json
+        with open(OVERLAY_FILE, 'w') as f:
+            json.dump(data, f, indent=2)
+        return jsonify({'status': 'ok'})
+
+    elif request.method == 'DELETE':
+        if os.path.exists(OVERLAY_FILE):
+            os.remove(OVERLAY_FILE)
+        return jsonify({'status': 'ok'})
 
 @app.route('/api/reoptimize')
 def reoptimize():
