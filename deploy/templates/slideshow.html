@@ -240,6 +240,9 @@
         }
 
         function startSlideshow() {
+            if (slideInterval) {
+                clearInterval(slideInterval);
+            }
             slideInterval = setInterval(nextSlide, config.delay);
         }
 
@@ -337,6 +340,30 @@
 
         // Clean up every 3 minutes
         setInterval(cleanupSlides, 180000);
+
+        // Check for config updates and apply them live
+        async function checkConfigUpdates() {
+            try {
+                const response = await fetch('/api/config');
+                const newConfig = await response.json();
+
+                // Update delay if changed
+                if (newConfig.delay * 1000 !== config.delay) {
+                    config.delay = newConfig.delay * 1000;
+                    startSlideshow(); // Restart interval with new delay
+                }
+
+                // Update transition duration if changed
+                if (newConfig.transition_duration * 1000 !== config.transitionDuration) {
+                    config.transitionDuration = newConfig.transition_duration * 1000;
+                }
+            } catch (error) {
+                console.error('Failed to check config updates:', error);
+            }
+        }
+
+        // Check for config updates every 5 seconds
+        setInterval(checkConfigUpdates, 5000);
 
         // Check overlay every 5 seconds
         setInterval(checkOverlay, 5000);
