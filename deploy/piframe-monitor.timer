@@ -1,0 +1,11 @@
+[Unit]
+Description=PiFrame Connection Monitor Timer
+Requires=piframe-monitor.service
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+AccuracySec=30s
+
+[Install]
+WantedBy=timers.target

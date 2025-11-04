@@ -1,0 +1,13 @@
+[Unit]
+Description=PiFrame Connection Monitor
+After=network-online.target nfs-client.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/monitor-connection.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
