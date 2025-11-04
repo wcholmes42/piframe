@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, send_from_directory
+from flask import Flask, render_template, jsonify, request
 import os
 import json
 import subprocess
@@ -55,11 +55,6 @@ def get_photos():
                     photos.append(file)
     
     return jsonify(photos)
-
-@app.route('/photos/<path:filename>')
-def serve_photo(filename):
-    """Serve photo from network mount"""
-    return send_from_directory(PHOTO_DIR, filename)
 
 @app.route('/api/config', methods=['GET', 'POST'])
 def config():

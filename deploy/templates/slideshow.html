@@ -192,7 +192,7 @@
                     console.error('Failed to load image:', photos[index]);
                     reject();
                 };
-                img.src = `/photos/${encodeURIComponent(photos[index])}`;
+                img.src = `file:///mnt/photos/${encodeURIComponent(photos[index])}`;
             });
         }
         
