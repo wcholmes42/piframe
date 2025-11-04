@@ -67,14 +67,6 @@ def config():
         return jsonify({'status': 'ok'})
     return jsonify(load_config())
 
-@app.route('/api/display/<action>')
-def display_action(action):
-    if action == 'on':
-        subprocess.run(['display-on'])
-    elif action == 'off':
-        subprocess.run(['display-off'])
-    return jsonify({'status': 'ok'})
-
 @app.route('/api/reoptimize')
 def reoptimize():
     subprocess.run(['ssh', 'root@192.168.68.42', 'docker restart piframe-optimizer'])

@@ -198,13 +198,8 @@
                     <div class="status-label">Photo Count</div>
                     <div class="status-value" id="photoCount">Loading...</div>
                 </div>
-                <div class="status-item">
-                    <div class="status-label">Display Status</div>
-                    <div class="status-value" id="displayStatus">Unknown</div>
-                </div>
             </div>
             <div class="button-group">
-                <button onclick="toggleDisplay()">Toggle Display</button>
                 <button class="secondary" onclick="reoptimize()">Re-optimize Photos</button>
                 <a href="/slideshow" class="link-button" target="_blank">Open Slideshow</a>
             </div>
@@ -262,18 +257,6 @@
             }
         }
 
-        async function toggleDisplay() {
-            try {
-                const status = document.getElementById('displayStatus').textContent;
-                const action = status === 'ON' ? 'off' : 'on';
-                await fetch(`/api/display/${action}`);
-                document.getElementById('displayStatus').textContent = action.toUpperCase();
-                showToast(`Display turned ${action}`);
-            } catch (error) {
-                showToast('Error toggling display');
-            }
-        }
-
         async function reoptimize() {
             try {
                 await fetch('/api/reoptimize');
@@ -314,7 +297,6 @@
 
         // Load status on page load
         loadStatus();
-        document.getElementById('displayStatus').textContent = 'ON';
 
         // Refresh photo count every 30 seconds
         setInterval(loadStatus, 30000);
