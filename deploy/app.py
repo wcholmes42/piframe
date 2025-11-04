@@ -18,7 +18,8 @@ def load_config():
         'delay': 10,
         'randomize': False,
         'recursive': True,
-        'transition_duration': 0.1
+        'transition_duration': 0.1,
+        'stretch': True
     }
 
 def save_config(config):
