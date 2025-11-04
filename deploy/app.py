@@ -6,9 +6,9 @@ import time
 
 app = Flask(__name__)
 
-CONFIG_FILE = '/etc/piframe-config.json'
-OVERLAY_FILE = '/tmp/piframe-overlay.json'
-PHOTO_DIR = '/mnt/photos'
+CONFIG_FILE = os.environ.get('CONFIG_FILE', '/etc/piframe-config.json')
+OVERLAY_FILE = os.environ.get('OVERLAY_FILE', '/tmp/piframe-overlay.json')
+PHOTO_DIR = os.environ.get('PHOTO_DIR', '/mnt/photos')
 
 def load_config():
     if os.path.exists(CONFIG_FILE):
