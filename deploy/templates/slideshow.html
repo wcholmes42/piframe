@@ -189,9 +189,15 @@
                     resolve(slide);
                 };
                 img.onerror = () => {
-                    console.error('Failed to load image:', photos[index]);
-                    reject();
+                    // If file:// fails (remote browser), try HTTP
+                    if (img.src.startsWith('file://')) {
+                        img.src = `/photos/${encodeURIComponent(photos[index])}`;
+                    } else {
+                        console.error('Failed to load image:', photos[index]);
+                        reject();
+                    }
                 };
+                // Try file:// first (fast for Pi), falls back to HTTP if not available
                 img.src = `file:///mnt/photos/${encodeURIComponent(photos[index])}`;
             });
         }

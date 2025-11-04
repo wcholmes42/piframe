@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_from_directory
 import os
 import json
 import subprocess
@@ -55,6 +55,11 @@ def get_photos():
                     photos.append(file)
     
     return jsonify(photos)
+
+@app.route('/photos/<path:filename>')
+def serve_photo(filename):
+    """Serve photos via HTTP for remote browsers (Pi uses file:// for speed)"""
+    return send_from_directory(PHOTO_DIR, filename)
 
 @app.route('/api/config', methods=['GET', 'POST'])
 def config():
