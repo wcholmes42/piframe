@@ -72,9 +72,14 @@ def config():
 
 @app.route('/api/reload')
 def reload_slideshow():
-    """Trigger slideshow reload by updating a timestamp file"""
-    with open('/tmp/piframe-reload', 'w') as f:
-        f.write(str(time.time()))
+    """Trigger slideshow reload by restarting Chromium"""
+    subprocess.run(['killall', 'chromium'])
+    subprocess.run(['sleep', '2'], shell=False)
+    subprocess.Popen([
+        'chromium', '--kiosk', '--no-sandbox', '--window-size=1920,1080',
+        '--noerrdialogs', '--disable-infobars', '--incognito',
+        'http://localhost:5000/slideshow'
+    ], env={'DISPLAY': ':0'}, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return jsonify({'status': 'ok'})
 
 @app.route('/api/overlay', methods=['GET', 'POST', 'DELETE'])
