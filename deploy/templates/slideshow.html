@@ -183,22 +183,34 @@
 
             // Preload image before adding to DOM
             return new Promise((resolve, reject) => {
+                let attemptCount = 0;
+                const filename = encodeURIComponent(photos[index]);
+
+                const tryPaths = [
+                    `file:///mnt/photos/${filename}`,           // Pi NFS mount (fastest)
+                    `file://192.168.68.42/Pics/Frame-Optimized/${filename}`,  // Windows UNC via SMB
+                    `/photos/${filename}`                       // HTTP fallback
+                ];
+
+                const tryNext = () => {
+                    if (attemptCount >= tryPaths.length) {
+                        console.error('Failed to load image from all paths:', photos[index]);
+                        reject();
+                        return;
+                    }
+                    img.src = tryPaths[attemptCount++];
+                };
+
                 img.onload = () => {
                     slide.appendChild(img);
                     container.appendChild(slide);
                     resolve(slide);
                 };
-                img.onerror = () => {
-                    // If file:// fails (remote browser), try HTTP
-                    if (img.src.startsWith('file://')) {
-                        img.src = `/photos/${encodeURIComponent(photos[index])}`;
-                    } else {
-                        console.error('Failed to load image:', photos[index]);
-                        reject();
-                    }
-                };
-                // Try file:// first (fast for Pi), falls back to HTTP if not available
-                img.src = `file:///mnt/photos/${encodeURIComponent(photos[index])}`;
+
+                img.onerror = tryNext;
+
+                // Start with first path
+                tryNext();
             });
         }
         
