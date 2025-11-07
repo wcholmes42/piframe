@@ -1,11 +1,12 @@
 #!/bin/bash
-# PiFrame FBI Slideshow - Direct Framebuffer (No X11)
-# Uses fbi (framebuffer image viewer) for console display
+# PiFrame FBI Slideshow with Boot Splash
+# Shows loading screen during network mount, then starts slideshow
 
 PHOTO_DIR="/mnt/photos"
 TEMP_DIR="/tmp/photos-with-clock"
 INTERVAL=10
 LOG_FILE="/var/log/piframe-fbi.log"
+SPLASH_IMAGE="/opt/piframe/splash/loading.png"
 
 log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
@@ -53,8 +54,59 @@ generate_timestamped_photos() {
     log "   Generated $count timestamped photos"
 }
 
+# Show loading splash during mount
+show_loading_splash() {
+    if [ -f "$SPLASH_IMAGE" ]; then
+        log "Displaying loading splash..."
+        fbi -T 1 -a --noverbose "$SPLASH_IMAGE" </dev/null >/dev/null 2>&1 &
+        SPLASH_PID=$!
+        echo $SPLASH_PID > /tmp/splash.pid
+    fi
+}
+
+hide_loading_splash() {
+    if [ -f "/tmp/splash.pid" ]; then
+        local pid=$(cat /tmp/splash.pid)
+        kill $pid 2>/dev/null || true
+        rm -f /tmp/splash.pid
+    fi
+}
+
+# Wait for network mount with splash
+wait_for_mount() {
+    show_loading_splash
+
+    log "Waiting for network mount: $PHOTO_DIR"
+
+    local timeout=60
+    local elapsed=0
+
+    while ! mountpoint -q "$PHOTO_DIR"; do
+        if [ $elapsed -ge $timeout ]; then
+            log "ERROR: Mount timeout after ${timeout}s"
+            hide_loading_splash
+            return 1
+        fi
+
+        sleep 1
+        ((elapsed++))
+    done
+
+    log "Network mount ready"
+    hide_loading_splash
+    return 0
+}
+
+# Main execution
 log "PiFrame FBI Slideshow starting"
 
+# Wait for network mount (shows splash)
+if ! wait_for_mount; then
+    log "FATAL: Cannot start without mounted photos"
+    exit 1
+fi
+
+# Main slideshow loop
 LAST_BRIGHTNESS=""
 
 while true; do

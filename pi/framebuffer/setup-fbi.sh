@@ -14,7 +14,7 @@ echo ""
 # Install dependencies
 echo "[1/5] Installing dependencies..."
 apt-get update
-apt-get install -y fbi cifs-utils python3-flask
+apt-get install -y fbi cifs-utils imagemagick
 
 # Create directories
 echo "[2/5] Creating directories..."
@@ -128,6 +128,7 @@ echo "Configuration:"
 echo "  Photos: /mnt/photos/{bright,medium,dim}"
 echo "  Count: $BRIGHT_COUNT"
 echo "  Method: fbi (direct framebuffer)"
+echo "  Clock: Timestamped on photos"
 echo "  Logs: journalctl -u piframe-fbi -f"
 echo ""
 echo "Starting slideshow..."

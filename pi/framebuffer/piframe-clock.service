@@ -1,0 +1,17 @@
+[Unit]
+Description=PiFrame Clock Overlay
+After=piframe-fbi.service
+Wants=piframe-fbi.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/piframe
+ExecStart=/usr/bin/python3 /opt/piframe/clock-overlay.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

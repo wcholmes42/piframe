@@ -45,13 +45,13 @@ while true; do
             log "Starting slideshow: $PHOTO_COUNT photos from $FOLDER/"
 
             # fbi options:
-            # -T 1 = use VT1 (console 1)
             # -a = autoscale images
             # --noverbose = no text overlay
             # -t $INTERVAL = seconds between photos
             # -u = random order
             # -l = loop forever
-            fbi -T 1 -a --noverbose -t $INTERVAL -u -l "$FOLDER"/*.png </dev/null >/dev/null 2>&1 &
+            # Use openvt to properly start on VT1 (prevents white bar artifact)
+            openvt -c 1 -s -f -- fbi -a --noverbose -t $INTERVAL -u -l "$FOLDER"/*.png &
             FBI_PID=$!
             echo $FBI_PID > /tmp/fbi.pid
             log "FBI started (PID: $FBI_PID)"
