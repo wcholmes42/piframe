@@ -93,9 +93,11 @@ def main():
             now = datetime.now()
             time_str = now.strftime("%I:%M %p").lstrip('0')
 
-            # Only update when time changes
+            # Redraw every cycle to prevent FBI from overwriting
+            draw_text(fb, time_str, font)
+
+            # Print only when time changes
             if time_str != last_time:
-                draw_text(fb, time_str, font)
                 last_time = time_str
                 print(f"{time_str}")
 
