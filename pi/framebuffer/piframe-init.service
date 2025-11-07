@@ -1,0 +1,12 @@
+[Unit]
+Description=PiFrame Framebuffer Initialization
+Before=piframe-fbi.service
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+ExecStart=/opt/piframe/disable-fbcon.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
