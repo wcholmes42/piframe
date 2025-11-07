@@ -8,7 +8,7 @@ set -e
 UNRAID_IP="192.168.68.42"
 PHOTO_SOURCE="Pics/Frame-Optimized"
 FAN_TEMP_TRIGGER=40000  # 40°C in millidegrees
-NIGHT_HOUR=20  # 8pm
+NIGHT_HOUR=19  # 7:30pm
 MORNING_HOUR=8  # 8am
 
 echo "================================"
@@ -88,12 +88,9 @@ dietpi-autostart 17
 
 # Setup cron schedule
 echo "[7/8] Configuring schedule..."
-(crontab -l 2>/dev/null | grep -v "nightmode\|feh"; cat << CRON
-# Night mode at ${NIGHT_HOUR}:00
-0 $NIGHT_HOUR * * * touch /tmp/nightmode; killall feh
-
-# Day mode at ${MORNING_HOUR}:00
-0 $MORNING_HOUR * * * rm -f /tmp/nightmode; killall feh
+(crontab -l 2>/dev/null | grep -v "shutdown"; cat << CRON
+# Shutdown at ${NIGHT_HOUR}:30 for smart switch power-off
+30 $NIGHT_HOUR * * * /sbin/shutdown -h now
 CRON
 ) | crontab -
 

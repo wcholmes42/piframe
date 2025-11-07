@@ -1,0 +1,13 @@
+{
+  "photo_dir": "/mnt/photos",
+  "interval": 10,
+  "brightness_schedule": {
+    "0-8": "dim",
+    "8-17": "bright",
+    "17-19": "medium",
+    "19-24": "dim"
+  },
+  "width": 1920,
+  "height": 1080,
+  "framebuffer_device": "/dev/fb0"
+}

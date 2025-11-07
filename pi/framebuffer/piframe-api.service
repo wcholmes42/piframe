@@ -1,0 +1,16 @@
+[Unit]
+Description=PiFrame API Server
+After=network.target piframe-slideshow.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/piframe
+ExecStart=/usr/bin/python3 /opt/piframe/api.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

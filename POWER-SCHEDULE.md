@@ -4,12 +4,12 @@ The PiFrame uses automated power scheduling via cron and a smart switch to turn 
 
 ## Schedule
 
-**8:00 PM** - Pi graceful shutdown (cron)
+**7:30 PM** - Pi graceful shutdown (cron)
 - Cron job runs: `shutdown -h now`
 - Pi shuts down gracefully (flushes writes, stops services)
 - Monitor stays on (still has power)
 
-**8:05 PM** - Smart switch cuts power (home automation)
+**7:35 PM** - Smart switch cuts power (home automation)
 - 5-minute delay ensures Pi is fully shut down
 - Cuts power to entire power strip (Pi + Monitor)
 - Safe because Pi is already off
@@ -26,14 +26,14 @@ The PiFrame uses automated power scheduling via cron and a smart switch to turn 
 
 ### Pi Cron Job (already configured)
 ```bash
-# Shutdown at 8 PM for smart switch power-off
-0 20 * * * /sbin/shutdown -h now
+# Shutdown at 7:30 PM for smart switch power-off
+30 19 * * * /sbin/shutdown -h now
 ```
 
 View/edit with: `ssh root@192.168.68.75 "crontab -e"`
 
 ### Smart Switch (configure in your home automation)
-- **OFF**: 8:05 PM (5 minutes after Pi shutdown)
+- **OFF**: 7:35 PM (5 minutes after Pi shutdown)
 - **ON**: 8:00 AM
 
 ## Testing

@@ -1,0 +1,16 @@
+[Unit]
+Description=PiFrame Framebuffer Slideshow
+After=network.target local-fs.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/piframe
+ExecStart=/usr/bin/python3 /opt/piframe/slideshow.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
