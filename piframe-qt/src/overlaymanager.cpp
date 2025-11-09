@@ -98,41 +98,34 @@ void OverlayManager::setDominantColor(const QColor &color)
 
 void OverlayManager::calculateAdaptiveColors()
 {
-    // GUARANTEED HIGH CONTRAST COLOR THEORY!
+    // MAXIMUM CONTRAST - ALWAYS READABLE!
     float h, s, v;
     m_dominantColor.getHsvF(&h, &s, &v);
 
     QColor newTextColor;
     QColor newOutlineColor;
 
-    // Calculate COMPLEMENTARY color (180° on color wheel)
+    // Calculate COMPLEMENTARY color for text
     float complementaryHue = h + 0.5f;
     if (complementaryHue > 1.0f) complementaryHue -= 1.0f;
 
-    // HIGH saturation for vibrant colors
-    float textSaturation = 0.85f;
+    // Text brightness - SIMPLE INVERSION
+    float textValue = 1.0f - m_backgroundBrightness;
+    textValue = qBound(0.35f, textValue, 0.98f);
 
-    // GUARANTEED CONTRAST - brightness is INVERTED from background
-    float textValue;
-    if (m_backgroundBrightness > 0.5f) {
-        // Bright background (0.5-1.0) -> DARK text (0.2-0.4)
-        textValue = 0.2f + (1.0f - m_backgroundBrightness) * 0.4f;
-    } else {
-        // Dark background (0.0-0.5) -> BRIGHT text (0.6-1.0)
-        textValue = 0.6f + (0.5f - m_backgroundBrightness) * 0.8f;
-    }
+    // High saturation for vibrant text
+    float textSaturation = 0.88f;
 
-    // Ensure text is never too dark or too bright to see
-    textValue = qBound(0.25f, textValue, 0.95f);
-
-    // Vibrant complementary color
     newTextColor = QColor::fromHsvF(complementaryHue, textSaturation, textValue);
 
-    // Outline: ALWAYS opposite brightness for maximum pop
-    float outlineValue = (m_backgroundBrightness > 0.5f) ? 0.95f : 0.15f;
-    float outlineSaturation = 0.2f;
+    // Outline: Use ORIGINAL hue (NOT complementary) for maximum separation
+    // Plus OPPOSITE brightness from text
+    float outlineHue = h;  // Use original photo color for outline
+    float outlineValue = m_backgroundBrightness;  // Match background brightness
+    outlineValue = qBound(0.05f, outlineValue, 0.75f);
 
-    newOutlineColor = QColor::fromHsvF(complementaryHue, outlineSaturation, outlineValue);
+    // Low saturation outline - acts as shadow
+    newOutlineColor = QColor::fromHsvF(outlineHue, 0.2f, outlineValue);
 
     if (m_adaptiveTextColor != newTextColor) {
         m_adaptiveTextColor = newTextColor;
