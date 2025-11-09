@@ -7,6 +7,31 @@ Item {
     property bool crystalBallEnabled: configManager.crystalBallEnabled
     property real crystalBallCrossfade: 0.0  // 0.0 to 1.0 during transitions
 
+    // Animation properties for crystal ball effect
+    property real ballTime: 0.0
+    property real ballScale: 1.0
+    property real ballRotation: 0
+    property real ballOffsetX: 0
+    property real ballOffsetY: 0
+
+    // Animation timer - ALWAYS runs for Ken Burns, amplified when crystal ball active
+    Timer {
+        running: true  // Always running!
+        repeat: true
+        interval: 16  // 60 FPS for smooth motion
+        onTriggered: {
+            ballTime += 0.016 * 0.8
+            // Ken Burns motion - smooth and beautiful
+            var intensity = crystalBallEnabled ? 1.0 : 0.4  // Gentler when ball off
+            ballOffsetX = Math.sin(ballTime * 0.7) * width * 0.15 * intensity + Math.sin(ballTime * 1.1) * width * 0.08 * intensity
+            ballOffsetY = Math.sin(ballTime * 0.9) * height * 0.15 * intensity + Math.sin(ballTime * 1.3) * height * 0.08 * intensity
+            // Pulsing zoom
+            ballScale = 1.05 + (0.25 * Math.sin(ballTime * 0.6) + 0.2 * Math.sin(ballTime * 1.0)) * intensity
+            // Rotation
+            ballRotation = 8 * Math.sin(ballTime * 0.5) * intensity
+        }
+    }
+
     // Two image layers for crossfade transitions
     Image {
         id: currentImage
@@ -16,8 +41,26 @@ Item {
         asynchronous: true
         cache: true  // Enable cache to prevent reload on source copy
         autoTransform: true  // Automatically apply EXIF orientation
-        opacity: crystalBallEnabled ? 0.0 : 1.0  // Hide when crystal ball is active
-        visible: !crystalBallEnabled
+        opacity: 1.0  // Always visible (shader handles visibility)
+
+        // Ken Burns transforms - ALWAYS ACTIVE with crystal ball!
+        transform: [
+            Translate {
+                x: ballOffsetX
+                y: ballOffsetY
+            },
+            Scale {
+                origin.x: currentImage.width / 2
+                origin.y: currentImage.height / 2
+                xScale: ballScale
+                yScale: ballScale
+            },
+            Rotation {
+                origin.x: currentImage.width / 2
+                origin.y: currentImage.height / 2
+                angle: ballRotation
+            }
+        ]
 
         // Hardware acceleration
         layer.enabled: true
@@ -38,8 +81,26 @@ Item {
         asynchronous: true
         cache: true  // Enable cache to prevent reload on source copy
         autoTransform: true  // Automatically apply EXIF orientation
-        opacity: crystalBallEnabled ? 0.0 : 0.0  // Hide when crystal ball is active
-        visible: !crystalBallEnabled
+        opacity: 0.0  // Hidden initially (shader controls during transition)
+
+        // Ken Burns transforms - ALWAYS ACTIVE with crystal ball!
+        transform: [
+            Translate {
+                x: ballOffsetX
+                y: ballOffsetY
+            },
+            Scale {
+                origin.x: nextImage.width / 2
+                origin.y: nextImage.height / 2
+                xScale: ballScale
+                yScale: ballScale
+            },
+            Rotation {
+                origin.x: nextImage.width / 2
+                origin.y: nextImage.height / 2
+                angle: ballRotation
+            }
+        ]
 
         // Hardware acceleration
         layer.enabled: true

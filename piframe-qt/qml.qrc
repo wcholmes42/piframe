@@ -7,5 +7,7 @@
         <file>qml/TextOverlay.qml</file>
         <file>qml/WeatherOverlay.qml</file>
         <file>qml/HolidayOverlay.qml</file>
+        <file>shaders/crystalball.vert.qsb</file>
+        <file>shaders/crystalball.frag.qsb</file>
     </qresource>
 </RCC>

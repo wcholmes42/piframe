@@ -90,20 +90,12 @@ Item {
         property real strength: root.currentStrength
         property vector2d resolution: Qt.vector2d(width, height)
 
-        // Vertex shader (passthrough)
-        vertexShader: "
-            uniform highp mat4 qt_Matrix;
-            attribute highp vec4 qt_Vertex;
-            attribute highp vec2 qt_MultiTexCoord0;
-            varying highp vec2 fragCoord;
+        // Compiled shaders for Qt 6
+        vertexShader: "qrc:/shaders/crystalball.vert.qsb"
+        fragmentShader: "qrc:/shaders/crystalball.frag.qsb"
 
-            void main() {
-                fragCoord = qt_MultiTexCoord0;
-                gl_Position = qt_Matrix * qt_Vertex;
-            }
-        "
-
-        // Fragment shader (crystal ball lens distortion)
+        // Old inline shader (Qt 6 requires compiled .qsb files)
+        /*
         fragmentShader: "
             varying highp vec2 fragCoord;
             uniform sampler2D tex1;
@@ -188,7 +180,7 @@ Item {
                     gl_FragColor = vec4(baseColor, 1.0) * qt_Opacity;
                 }
             }
-        "
+        */
     }
 
     // Fallback: show source1 if shader is disabled
