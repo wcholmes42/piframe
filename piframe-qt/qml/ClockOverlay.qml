@@ -22,7 +22,7 @@ Item {
             font.family: "DejaVu Sans"
             color: "white"
             horizontalAlignment: Text.AlignRight
-            width: 350  // Increased width to prevent text clipping
+            width: 450  // Extra space for "12:59:59 PM"
             elide: Text.ElideNone
             renderType: Text.QtRendering
 
@@ -38,7 +38,7 @@ Item {
             font.family: "DejaVu Sans"
             color: "white"
             horizontalAlignment: Text.AlignRight
-            width: 350  // Match time width to prevent text clipping
+            width: 450  // Match time width
             elide: Text.ElideNone
             renderType: Text.QtRendering
 

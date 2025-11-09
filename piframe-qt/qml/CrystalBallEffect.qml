@@ -45,8 +45,9 @@ Item {
     property real sphereRadius: Math.min(width, height) * currentRadius
     property real currentStrength: baseStrength + pulsingStrength
 
-    // Pulsing modulation
-    property real currentRadius: baseRadius + 0.05 * Math.sin(time * 0.5)
+    // Z-depth bounce modulation - bouncy ball effect!
+    property real bouncePhase: Math.abs(Math.sin(time * 1.2))  // Bounce frequency
+    property real currentRadius: baseRadius + 0.15 * bouncePhase * bouncePhase  // Quadratic for bounce feel
     property real pulsingStrength: 0.5 * Math.sin(time * 0.7)
 
     // Time animation
