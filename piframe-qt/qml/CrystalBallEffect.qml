@@ -47,31 +47,39 @@ Item {
 
     // Z-depth bounce modulation - bouncy ball effect!
     property real bouncePhase: Math.abs(Math.sin(time * 1.2))  // Bounce frequency
-    property real currentRadius: baseRadius + 0.15 * bouncePhase * bouncePhase  // Quadratic for bounce feel
+    property real currentRadius: 0.08 + 0.32 * bouncePhase * bouncePhase  // Shrinks to 0.08, bounces to 0.40!
     property real pulsingStrength: 0.5 * Math.sin(time * 0.7)
 
-    // Time animation
+    // Time animation - SLOWER for dramatic effect
     Timer {
         id: timeAnimator
-        interval: 16  // ~60 FPS
+        interval: 32  // ~30 FPS (slower, more dramatic)
         running: root.enabled && !root.paused
         repeat: true
         onTriggered: {
-            root.time += 0.016 * root.speedMultiplier
+            root.time += 0.032 * root.speedMultiplier * 0.5  // HALF SPEED
             updateSpherePosition()
         }
     }
 
-    // Update sphere position using Lissajous curves
+    // Update sphere position using CHAOTIC Lissajous curves
     function updateSpherePosition() {
-        // Classic demoscene Lissajous motion
-        // Combine two sine waves with different frequencies for each axis
-        var lissajousX = Math.sin(time * freqX1) * 0.3 + Math.sin(time * freqX2) * 0.2
-        var lissajousY = Math.sin(time * freqY1) * 0.3 + Math.sin(time * freqY2) * 0.2
+        // CHAOTIC demoscene motion - more frequencies!
+        var lissajousX = Math.sin(time * freqX1) * 0.35
+                       + Math.sin(time * freqX2) * 0.25
+                       + Math.sin(time * 0.3) * 0.15  // Extra chaos
 
-        // Map to screen coordinates (keep sphere mostly on screen)
-        sphereCenterX = width * (0.5 + lissajousX * 0.5)
-        sphereCenterY = height * (0.5 + lissajousY * 0.5)
+        var lissajousY = Math.sin(time * freqY1) * 0.35
+                       + Math.sin(time * freqY2) * 0.25
+                       + Math.sin(time * 0.4) * 0.15  // Extra chaos
+
+        // Add some random-looking motion
+        lissajousX += Math.sin(time * 1.7) * 0.1
+        lissajousY += Math.sin(time * 1.9) * 0.1
+
+        // Map to screen coordinates - wider range for chaos
+        sphereCenterX = width * (0.5 + lissajousX * 0.6)
+        sphereCenterY = height * (0.5 + lissajousY * 0.6)
     }
 
     // Main shader effect

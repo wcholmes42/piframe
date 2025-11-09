@@ -9,5 +9,7 @@
         <file>qml/HolidayOverlay.qml</file>
         <file>shaders/crystalball.vert.qsb</file>
         <file>shaders/crystalball.frag.qsb</file>
+        <file>shaders/textcontrast.vert.qsb</file>
+        <file>shaders/textcontrast.frag.qsb</file>
     </qresource>
 </RCC>

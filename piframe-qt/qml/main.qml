@@ -10,7 +10,6 @@ Window {
     title: "PiFrame Qt"
     color: "black"
 
-    // Hide mouse cursor in fullscreen mode
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.BlankCursor
@@ -18,7 +17,6 @@ Window {
         z: -100
     }
 
-    // Photo slideshow base layer
     PhotoSlideshow {
         id: slideshow
         anchors.fill: parent
@@ -26,46 +24,49 @@ Window {
         crystalBallEnabled: configManager.crystalBallEnabled
     }
 
-    // Clock overlay layer (always on top of photos)
+    ShaderEffectSource {
+        id: photoBackground
+        sourceItem: slideshow
+        hideSource: false
+        live: true
+        visible: false
+    }
+
     ClockOverlay {
         id: clockOverlay
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.margins: 20
-        z: 10
+        z: 100  // ABOVE BALL!
         visible: overlayManager.clockEnabled
     }
 
-    // Weather overlay layer
     WeatherOverlay {
         id: weatherOverlay
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.margins: 20
-        z: 10
+        z: 100
         visible: overlayManager.weatherEnabled
     }
 
-    // Text message overlay layer (centered)
     TextOverlay {
         id: textOverlay
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 80
         width: parent.width * 0.8
-        z: 15
+        z: 100
         visible: overlayManager.currentMessage !== ""
     }
 
-    // Holiday animation overlay (fullscreen particles)
     HolidayOverlay {
         id: holidayOverlay
         anchors.fill: parent
-        z: 5
+        z: 50
         visible: overlayManager.holidayEnabled && overlayManager.activeHoliday !== ""
     }
 
-    // Debug overlay (only in dev mode)
     Rectangle {
         visible: devMode
         anchors.bottom: parent.bottom
@@ -73,7 +74,7 @@ Window {
         width: debugText.width + 20
         height: debugText.height + 20
         color: "#80000000"
-        z: 100
+        z: 200
 
         Text {
             id: debugText
@@ -90,8 +91,6 @@ Window {
         }
     }
 
-    // Keyboard shortcuts for development
-    // Keyboard input handler (behind all visuals)
     Item {
         anchors.fill: parent
         z: -1
@@ -141,7 +140,6 @@ Window {
         }
     }
 
-    // Show instructions on startup in dev mode
     Component.onCompleted: {
         if (devMode) {
             console.log("=== PiFrame Qt Dev Mode ===");

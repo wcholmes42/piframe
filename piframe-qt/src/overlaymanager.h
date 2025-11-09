@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QDateTime>
 #include <QQueue>
+#include <QColor>
 
 struct TextMessage {
     QString text;
@@ -26,6 +27,10 @@ class OverlayManager : public QObject
     Q_PROPERTY(QString currentMessage READ currentMessage NOTIFY currentMessageChanged)
     Q_PROPERTY(QString weatherInfo READ weatherInfo NOTIFY weatherInfoChanged)
     Q_PROPERTY(int weatherTemp READ weatherTemp NOTIFY weatherTempChanged)
+    Q_PROPERTY(QColor adaptiveTextColor READ adaptiveTextColor NOTIFY adaptiveTextColorChanged)
+    Q_PROPERTY(QColor adaptiveOutlineColor READ adaptiveOutlineColor NOTIFY adaptiveOutlineColorChanged)
+    Q_PROPERTY(float backgroundBrightness READ backgroundBrightness WRITE setBackgroundBrightness NOTIFY backgroundBrightnessChanged)
+    Q_PROPERTY(QColor dominantColor READ dominantColor WRITE setDominantColor NOTIFY dominantColorChanged)
 
 public:
     explicit OverlayManager(QObject *parent = nullptr);
@@ -39,10 +44,16 @@ public:
     QString currentMessage() const { return m_currentMessage; }
     QString weatherInfo() const { return m_weatherInfo; }
     int weatherTemp() const { return m_weatherTemp; }
+    QColor adaptiveTextColor() const { return m_adaptiveTextColor; }
+    QColor adaptiveOutlineColor() const { return m_adaptiveOutlineColor; }
+    float backgroundBrightness() const { return m_backgroundBrightness; }
+    QColor dominantColor() const { return m_dominantColor; }
 
     void setClockEnabled(bool enabled);
     void setWeatherEnabled(bool enabled);
     void setHolidayEnabled(bool enabled);
+    void setBackgroundBrightness(float brightness);
+    void setDominantColor(const QColor &color);
 
 public slots:
     void start();
@@ -61,6 +72,10 @@ signals:
     void currentMessageChanged(const QString &message);
     void weatherInfoChanged(const QString &info);
     void weatherTempChanged(int temp);
+    void adaptiveTextColorChanged(const QColor &color);
+    void adaptiveOutlineColorChanged(const QColor &color);
+    void backgroundBrightnessChanged(float brightness);
+    void dominantColorChanged(const QColor &color);
 
 private slots:
     void updateClock();
@@ -69,6 +84,7 @@ private slots:
 
 private:
     QString detectCurrentHoliday() const;
+    void calculateAdaptiveColors();
 
     bool m_clockEnabled;
     bool m_weatherEnabled;
@@ -80,6 +96,11 @@ private:
     QString m_currentMessage;
     QString m_weatherInfo;
     int m_weatherTemp;
+
+    QColor m_adaptiveTextColor;
+    QColor m_adaptiveOutlineColor;
+    float m_backgroundBrightness;
+    QColor m_dominantColor;
 
     QTimer *m_clockTimer;
     QTimer *m_holidayTimer;

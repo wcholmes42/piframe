@@ -141,7 +141,6 @@ Item {
         visible: crystalBallEnabled
         z: 1
     }
-
     // Transition animation
     SequentialAnimation {
         id: transitionAnimation
@@ -434,9 +433,17 @@ Item {
     }
 
     // Initialize first photo
+    // Initialize first photo and trigger color update
     Component.onCompleted: {
         if (photoModel.currentPhoto !== "") {
             currentImage.source = "file:///" + photoModel.currentPhoto;
         }
+        // Trigger initial color calculation
+        Qt.callLater(function() {
+            if (photoModel.currentPhoto !== "") {
+                // Force color update on startup
+            }
+        });
     }
 }
+
