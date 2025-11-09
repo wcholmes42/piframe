@@ -3,8 +3,8 @@ import QtQuick 2.15
 Item {
     id: slideshow
 
-    // Crystal ball mode toggle (will be wired to config)
-    property bool crystalBallEnabled: false
+    // Crystal ball mode toggle - wired to config
+    property bool crystalBallEnabled: configManager.crystalBallEnabled
     property real crystalBallCrossfade: 0.0  // 0.0 to 1.0 during transitions
 
     // Two image layers for crossfade transitions
@@ -14,7 +14,8 @@ Item {
         fillMode: Image.PreserveAspectFit
         smooth: true
         asynchronous: true
-        cache: false
+        cache: true  // Enable cache to prevent reload on source copy
+        autoTransform: true  // Automatically apply EXIF orientation
         opacity: crystalBallEnabled ? 0.0 : 1.0  // Hide when crystal ball is active
         visible: !crystalBallEnabled
 
@@ -35,7 +36,8 @@ Item {
         fillMode: Image.PreserveAspectFit
         smooth: true
         asynchronous: true
-        cache: false
+        cache: true  // Enable cache to prevent reload on source copy
+        autoTransform: true  // Automatically apply EXIF orientation
         opacity: crystalBallEnabled ? 0.0 : 0.0  // Hide when crystal ball is active
         visible: !crystalBallEnabled
 
@@ -115,10 +117,11 @@ Item {
 
         ScriptAction {
             script: {
-                // Swap images
-                var temp = currentImage.source;
+                // Copy to currentImage (uses cache, instant)
                 currentImage.source = nextImage.source;
                 currentImage.opacity = 1.0;
+
+                // Reset nextImage for next photo
                 nextImage.opacity = 0.0;
                 nextImage.source = "";
 
@@ -181,12 +184,15 @@ Item {
 
         ScriptAction {
             script: {
-                // Reset positions and swap
+                // Reset positions
                 currentImage.x = 0;
                 nextImage.x = 0;
-                var temp = currentImage.source;
+
+                // Copy to currentImage (uses cache)
                 currentImage.source = nextImage.source;
                 currentImage.opacity = 1.0;
+
+                // Reset nextImage
                 nextImage.opacity = 0.0;
                 nextImage.source = "";
 
@@ -248,12 +254,15 @@ Item {
 
         ScriptAction {
             script: {
-                // Reset and swap
+                // Reset scale
                 currentImage.scale = 1.0;
                 nextImage.scale = 1.0;
-                var temp = currentImage.source;
+
+                // Copy to currentImage (uses cache)
                 currentImage.source = nextImage.source;
                 currentImage.opacity = 1.0;
+
+                // Reset nextImage
                 nextImage.opacity = 0.0;
                 nextImage.source = "";
 

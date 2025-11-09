@@ -10,6 +10,14 @@ Window {
     title: "PiFrame Qt"
     color: "black"
 
+    // Hide mouse cursor in fullscreen mode
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.BlankCursor
+        propagateComposedEvents: true
+        z: -100
+    }
+
     // Photo slideshow base layer
     PhotoSlideshow {
         id: slideshow

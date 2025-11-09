@@ -19,12 +19,12 @@ Item {
             text: overlayManager.currentTime
             font.pixelSize: 72
             font.bold: true
-            font.family: "Sans Serif"
+            font.family: "DejaVu Sans"
             color: "white"
             horizontalAlignment: Text.AlignRight
-            width: 300  // Fixed width to prevent pulsing
+            width: 350  // Increased width to prevent text clipping
             elide: Text.ElideNone
-            renderType: Text.NativeRendering
+            renderType: Text.QtRendering
 
             // GPU-accelerated layer
             layer.enabled: true
@@ -35,10 +35,12 @@ Item {
             id: dateText
             text: overlayManager.currentDate
             font.pixelSize: 24
-            font.family: "Arial"
+            font.family: "DejaVu Sans"
             color: "white"
             horizontalAlignment: Text.AlignRight
-            width: timeText.width
+            width: 350  // Match time width to prevent text clipping
+            elide: Text.ElideNone
+            renderType: Text.QtRendering
 
             // GPU-accelerated layer
             layer.enabled: true
