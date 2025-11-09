@@ -14,21 +14,35 @@ Item {
     property real ballOffsetX: 0
     property real ballOffsetY: 0
 
-    // Animation timer - ALWAYS runs for Ken Burns, amplified when crystal ball active
+    // Animation timer - ALWAYS runs for Ken Burns - EXTREME VALUES FOR TESTING!
     Timer {
+        id: kenBurnsTimer
         running: true  // Always running!
         repeat: true
         interval: 16  // 60 FPS for smooth motion
         onTriggered: {
-            ballTime += 0.016 * 0.8
-            // Ken Burns motion - smooth and beautiful
-            var intensity = crystalBallEnabled ? 1.0 : 0.4  // Gentler when ball off
-            ballOffsetX = Math.sin(ballTime * 0.7) * width * 0.15 * intensity + Math.sin(ballTime * 1.1) * width * 0.08 * intensity
-            ballOffsetY = Math.sin(ballTime * 0.9) * height * 0.15 * intensity + Math.sin(ballTime * 1.3) * height * 0.08 * intensity
-            // Pulsing zoom
-            ballScale = 1.05 + (0.25 * Math.sin(ballTime * 0.6) + 0.2 * Math.sin(ballTime * 1.0)) * intensity
-            // Rotation
-            ballRotation = 8 * Math.sin(ballTime * 0.5) * intensity
+            // Safety check for valid dimensions
+            if (slideshow.width === 0 || slideshow.height === 0) return
+
+            ballTime += 0.016 * 2.0  // FASTER for visibility
+            var intensity = 1.0  // ALWAYS FULL INTENSITY
+
+            // MASSIVE motion so you HAVE to see it
+            ballOffsetX = Math.sin(ballTime * 0.7) * slideshow.width * 0.3 * intensity
+            ballOffsetY = Math.sin(ballTime * 0.9) * slideshow.height * 0.3 * intensity
+            // HUGE zoom
+            ballScale = 1.2 + (0.5 * Math.sin(ballTime * 0.6)) * intensity
+            // BIG rotation
+            ballRotation = 20 * Math.sin(ballTime * 0.5) * intensity
+
+            // DEBUG - log every 60 frames
+            if (Math.floor(ballTime * 60) % 60 === 0) {
+                console.log("KEN BURNS ACTIVE - scale:", ballScale.toFixed(2), "offsetX:", ballOffsetX.toFixed(0), "rotation:", ballRotation.toFixed(1))
+            }
+        }
+
+        Component.onCompleted: {
+            console.log("Ken Burns timer initialized - EXTREME MODE")
         }
     }
 
@@ -39,30 +53,11 @@ Item {
         fillMode: Image.PreserveAspectFit
         smooth: true
         asynchronous: true
-        cache: true  // Enable cache to prevent reload on source copy
-        autoTransform: true  // Automatically apply EXIF orientation
-        opacity: 1.0  // Always visible (shader handles visibility)
+        cache: true
+        autoTransform: true
+        opacity: 1.0
 
-        // Ken Burns transforms - ALWAYS ACTIVE with crystal ball!
-        transform: [
-            Translate {
-                x: ballOffsetX
-                y: ballOffsetY
-            },
-            Scale {
-                origin.x: currentImage.width / 2
-                origin.y: currentImage.height / 2
-                xScale: ballScale
-                yScale: ballScale
-            },
-            Rotation {
-                origin.x: currentImage.width / 2
-                origin.y: currentImage.height / 2
-                angle: ballRotation
-            }
-        ]
-
-        // Hardware acceleration
+        // NO transforms here - will be applied to ball shader output
         layer.enabled: true
         layer.smooth: true
 
@@ -79,30 +74,11 @@ Item {
         fillMode: Image.PreserveAspectFit
         smooth: true
         asynchronous: true
-        cache: true  // Enable cache to prevent reload on source copy
-        autoTransform: true  // Automatically apply EXIF orientation
-        opacity: 0.0  // Hidden initially (shader controls during transition)
+        cache: true
+        autoTransform: true
+        opacity: 0.0
 
-        // Ken Burns transforms - ALWAYS ACTIVE with crystal ball!
-        transform: [
-            Translate {
-                x: ballOffsetX
-                y: ballOffsetY
-            },
-            Scale {
-                origin.x: nextImage.width / 2
-                origin.y: nextImage.height / 2
-                xScale: ballScale
-                yScale: ballScale
-            },
-            Rotation {
-                origin.x: nextImage.width / 2
-                origin.y: nextImage.height / 2
-                angle: ballRotation
-            }
-        ]
-
-        // Hardware acceleration
+        // NO transforms here - will be applied to ball shader output
         layer.enabled: true
         layer.smooth: true
 
@@ -130,16 +106,35 @@ Item {
         live: true
     }
 
-    // Crystal ball effect layer
+    // Crystal ball effect layer - ALWAYS SHOW KEN BURNS!
     CrystalBallEffect {
         id: crystalBall
         anchors.fill: parent
         source1: texture1
         source2: texture2
         crossfade: crystalBallCrossfade
-        enabled: crystalBallEnabled
-        visible: crystalBallEnabled
+        enabled: true  // ALWAYS enabled to show Ken Burns
+        visible: true  // ALWAYS visible
         z: 1
+
+        // Apply Ken Burns transforms to the BALL output!
+        transform: [
+            Translate {
+                x: ballOffsetX
+                y: ballOffsetY
+            },
+            Scale {
+                origin.x: crystalBall.width / 2
+                origin.y: crystalBall.height / 2
+                xScale: ballScale
+                yScale: ballScale
+            },
+            Rotation {
+                origin.x: crystalBall.width / 2
+                origin.y: crystalBall.height / 2
+                angle: ballRotation
+            }
+        ]
     }
     // Transition animation
     SequentialAnimation {

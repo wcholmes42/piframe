@@ -12,7 +12,6 @@ layout(std140, binding = 0) uniform buf {
     float sphereRadius;
     float strength;
     vec2 resolution;
-    float _padding;  // Alignment padding
 };
 
 layout(binding = 1) uniform sampler2D tex1;
