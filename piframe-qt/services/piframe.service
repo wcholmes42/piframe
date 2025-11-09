@@ -1,0 +1,29 @@
+[Unit]
+Description=PiFrame Qt Digital Photo Frame
+After=network.target local-fs.target
+Wants=piframe-sync.timer
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/piframe
+Environment="QT_QPA_PLATFORM=eglfs"
+Environment="QT_QPA_EGLFS_PHYSICAL_WIDTH=600"
+Environment="QT_QPA_EGLFS_PHYSICAL_HEIGHT=340"
+Environment="QT_QPA_EGLFS_KMS_CONFIG=/opt/piframe/kmsconfig.json"
+ExecStart=/opt/piframe/piframe-qt --config /opt/piframe/config.json
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+# Resource limits
+CPUQuota=80%
+MemoryLimit=512M
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

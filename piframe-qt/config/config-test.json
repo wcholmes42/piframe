@@ -1,0 +1,93 @@
+{
+  "display": {
+    "width": 1920,
+    "height": 1080,
+    "fullscreen": true,
+    "framerate": 60
+  },
+  "slideshow": {
+    "interval_seconds": 5,
+    "transition_duration_ms": 1500,
+    "transition_type": "fade",
+    "shuffle": true,
+    "photo_source": "P:/",
+    "crystal_ball_enabled": true,
+    "supported_formats": ["*.png", "*.jpg", "*.jpeg", "*.PNG", "*.JPG", "*.JPEG"]
+  },
+  "brightness": {
+    "mode": "auto",
+    "schedule": {
+      "0-8": "dim",
+      "8-17": "bright",
+      "17-19": "medium",
+      "19-24": "dim"
+    },
+    "folders": {
+      "bright": "bright",
+      "medium": "medium",
+      "dim": "dim"
+    }
+  },
+  "overlays": {
+    "clock": {
+      "enabled": true,
+      "position": "top-right",
+      "format": "24h",
+      "font_size": 48,
+      "color": "white",
+      "shadow": true
+    },
+    "weather": {
+      "enabled": false,
+      "position": "bottom-left",
+      "api_key": "",
+      "location": "",
+      "update_interval_minutes": 30
+    },
+    "text": {
+      "enabled": true,
+      "position": "bottom-center",
+      "default_duration_seconds": 10,
+      "font_size": 36,
+      "animation": "fade"
+    },
+    "holiday": {
+      "enabled": true,
+      "auto_detect": true,
+      "animations": {
+        "christmas": {
+          "type": "snowflakes",
+          "particle_count": 50
+        },
+        "halloween": {
+          "type": "bats",
+          "particle_count": 20
+        },
+        "newyear": {
+          "type": "fireworks",
+          "particle_count": 30
+        }
+      }
+    }
+  },
+  "storage": {
+    "usb_mount": "/mnt/photocache",
+    "network_source": "//192.168.68.42/Pics/Frame-Optimized",
+    "sync_interval_minutes": 60,
+    "auto_sync": true,
+    "cache_size_gb": 32
+  },
+  "network": {
+    "api_port": 5000,
+    "websocket_port": 5001,
+    "unraid_host": "192.168.68.42",
+    "unraid_share": "Pics/Frame-Optimized"
+  },
+  "system": {
+    "log_level": "INFO",
+    "tmpfs_logs": true,
+    "readonly_sd": false,
+    "gpu_memory_mb": 256,
+    "watchdog_enabled": true
+  }
+}

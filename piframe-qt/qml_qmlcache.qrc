@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<RCC>
+    <qresource prefix="/">
+        <file alias="qml/main.qml">qml/main.qml</file>
+        <file alias="qml/PhotoSlideshow.qml">qml/PhotoSlideshow.qml</file>
+        <file alias="qml/CrystalBallEffect.qml">qml/CrystalBallEffect.qml</file>
+        <file alias="qml/ClockOverlay.qml">qml/ClockOverlay.qml</file>
+        <file alias="qml/TextOverlay.qml">qml/TextOverlay.qml</file>
+        <file alias="qml/WeatherOverlay.qml">qml/WeatherOverlay.qml</file>
+        <file alias="qml/HolidayOverlay.qml">qml/HolidayOverlay.qml</file>
+    </qresource>
+</RCC>

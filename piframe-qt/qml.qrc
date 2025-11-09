@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/main.qml</file>
+        <file>qml/PhotoSlideshow.qml</file>
+        <file>qml/CrystalBallEffect.qml</file>
+        <file>qml/ClockOverlay.qml</file>
+        <file>qml/TextOverlay.qml</file>
+        <file>qml/WeatherOverlay.qml</file>
+        <file>qml/HolidayOverlay.qml</file>
+    </qresource>
+</RCC>

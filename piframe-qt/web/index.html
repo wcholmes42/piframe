@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PiFrame Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            color: #667eea;
+            font-size: 1.5em;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .status-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .status-item label {
+            display: block;
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .status-item .value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        button.secondary:hover {
+            box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+        }
+
+        .settings-group {
+            margin-bottom: 20px;
+        }
+
+        .settings-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus,
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .message-box {
+            margin-top: 15px;
+        }
+
+        .message-box textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1em;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .message-box textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.playing {
+            background: #4caf50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+        }
+
+        .status-indicator.paused {
+            background: #ff9800;
+        }
+
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 2em;
+            }
+
+            .controls {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🖼️ PiFrame Control</h1>
+            <p>Professional Photo Frame Controller</p>
+        </header>
+
+        <!-- Status Card -->
+        <div class="card">
+            <h2>Status</h2>
+            <div class="status-grid">
+                <div class="status-item">
+                    <label>Slideshow</label>
+                    <div class="value">
+                        <span class="status-indicator" id="status-indicator"></span>
+                        <span id="status-playing">--</span>
+                    </div>
+                </div>
+                <div class="status-item">
+                    <label>Photos</label>
+                    <div class="value" id="status-photos">--</div>
+                </div>
+                <div class="status-item">
+                    <label>Current</label>
+                    <div class="value" id="status-current">--</div>
+                </div>
+                <div class="status-item">
+                    <label>Time</label>
+                    <div class="value" id="status-time">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Playback Controls -->
+        <div class="card">
+            <h2>Playback Controls</h2>
+            <div class="controls">
+                <button onclick="control('play')">▶️ Play</button>
+                <button onclick="control('pause')">⏸️ Pause</button>
+                <button onclick="control('next')">⏭️ Next</button>
+                <button onclick="control('previous')">⏮️ Previous</button>
+                <button onclick="control('refresh')" class="secondary">🔄 Refresh</button>
+            </div>
+        </div>
+
+        <!-- Slideshow Settings -->
+        <div class="card">
+            <h2>Slideshow Settings</h2>
+            <div class="settings-group">
+                <label for="interval">Interval (seconds)</label>
+                <input type="number" id="interval" value="10" min="1" max="300">
+            </div>
+            <div class="settings-group">
+                <label for="transition">Transition Type</label>
+                <select id="transition">
+                    <option value="fade">Fade</option>
+                    <option value="slide">Slide</option>
+                    <option value="zoom">Zoom</option>
+                </select>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="shuffle" checked>
+                <label for="shuffle">Shuffle photos</label>
+            </div>
+            <button onclick="saveSettings()">💾 Save Settings</button>
+        </div>
+
+        <!-- Overlays -->
+        <div class="card">
+            <h2>Overlays</h2>
+            <div class="checkbox-group">
+                <input type="checkbox" id="clock-enabled" checked>
+                <label for="clock-enabled">Show clock</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="weather-enabled">
+                <label for="weather-enabled">Show weather</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="holiday-enabled" checked>
+                <label for="holiday-enabled">Holiday animations</label>
+            </div>
+            <button onclick="saveOverlaySettings()">💾 Save Overlay Settings</button>
+        </div>
+
+        <!-- Send Message -->
+        <div class="card">
+            <h2>Send Message</h2>
+            <div class="message-box">
+                <textarea id="message-text" placeholder="Type your message here..."></textarea>
+            </div>
+            <div class="settings-group" style="margin-top: 15px;">
+                <label for="message-duration">Duration (seconds)</label>
+                <input type="number" id="message-duration" value="10" min="1" max="60">
+            </div>
+            <button onclick="sendMessage()" class="secondary">📢 Send Message</button>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        // Fetch status periodically
+        function updateStatus() {
+            fetch(`${API_BASE}/api/status`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.photos) {
+                        document.getElementById('status-photos').textContent = data.photos.count;
+                        document.getElementById('status-current').textContent = data.photos.current_index + 1;
+
+                        const playing = data.photos.is_playing;
+                        document.getElementById('status-playing').textContent = playing ? 'Playing' : 'Paused';
+
+                        const indicator = document.getElementById('status-indicator');
+                        indicator.className = 'status-indicator ' + (playing ? 'playing' : 'paused');
+                    }
+
+                    if (data.overlays) {
+                        document.getElementById('status-time').textContent = data.overlays.current_time;
+                    }
+                })
+                .catch(err => console.error('Status fetch error:', err));
+        }
+
+        // Control actions
+        function control(action) {
+            fetch(`${API_BASE}/api/control`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Action successful:', action);
+                    updateStatus();
+                } else {
+                    alert('Action failed: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => alert('Request failed: ' + err));
+        }
+
+        // Save settings
+        function saveSettings() {
+            const settings = {
+                slideshow_interval: parseInt(document.getElementById('interval').value),
+                transition_type: document.getElementById('transition').value,
+                shuffle: document.getElementById('shuffle').checked
+            };
+
+            fetch(`${API_BASE}/api/config`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(settings)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Settings saved!');
+                } else {
+                    alert('Failed to save: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => alert('Request failed: ' + err));
+        }
+
+        // Save overlay settings
+        function saveOverlaySettings() {
+            // This would need additional API endpoints in the C++ backend
+            alert('Overlay settings save - implement in backend');
+        }
+
+        // Send message
+        function sendMessage() {
+            const text = document.getElementById('message-text').value.trim();
+            const duration = parseInt(document.getElementById('message-duration').value);
+
+            if (!text) {
+                alert('Please enter a message');
+                return;
+            }
+
+            fetch(`${API_BASE}/api/message`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({text, duration})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('message-text').value = '';
+                    alert('Message sent!');
+                } else {
+                    alert('Failed to send: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(err => alert('Request failed: ' + err));
+        }
+
+        // Load config on page load
+        function loadConfig() {
+            fetch(`${API_BASE}/api/config`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.config) {
+                        document.getElementById('interval').value = data.config.slideshow_interval;
+                        document.getElementById('transition').value = data.config.transition_type;
+                        document.getElementById('shuffle').checked = data.config.shuffle;
+                    }
+                })
+                .catch(err => console.error('Config load error:', err));
+        }
+
+        // Initialize
+        updateStatus();
+        loadConfig();
+        setInterval(updateStatus, 2000);  // Update every 2 seconds
+    </script>
+</body>
+</html>

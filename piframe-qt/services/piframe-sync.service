@@ -1,0 +1,10 @@
+[Unit]
+Description=PiFrame Photo Sync from Unraid
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/opt/piframe/sync-photos.sh
+StandardOutput=journal
+StandardError=journal
