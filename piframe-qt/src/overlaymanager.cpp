@@ -148,7 +148,7 @@ void OverlayManager::updateWeather()
 void OverlayManager::updateClock()
 {
     QDateTime now = QDateTime::currentDateTime();
-    QString newTime = now.toString("HH:mm:ss");
+    QString newTime = now.toString("h:mm:ss AP");  // 12-hour with AM/PM
     QString newDate = now.toString("dddd, MMMM d, yyyy");
 
     if (m_currentTime != newTime) {
