@@ -12,22 +12,59 @@ layout(std140, binding = 0) uniform buf {
     float sphereRadius;
     float strength;
     vec2 resolution;
+    float kbScale;      // Ken Burns zoom
+    float kbRotation;   // Ken Burns rotation
+    vec2 kbOffset;      // Ken Burns pan
 };
 
 layout(binding = 1) uniform sampler2D tex1;
 layout(binding = 2) uniform sampler2D tex2;
 
+// Ken Burns UV transformation function
+vec2 applyKenBurns(vec2 uv, float scale, float rotation, vec2 offset) {
+    vec2 centered = uv - vec2(0.5);
+    float s = sin(rotation);
+    float c = cos(rotation);
+    mat2 rotMat = mat2(c, -s, s, c);
+    centered = rotMat * centered;
+    centered /= scale;
+    centered -= offset / resolution;
+    return clamp(centered + vec2(0.5), vec2(0.0), vec2(1.0));
+}
+
 void main() {
     vec2 uv = fragCoord;
+
+    // APPLY KEN BURNS TRANSFORMATION TO UV!
+    // Center UV coordinates
+    vec2 uvCentered = uv - vec2(0.5);
+
+    // Apply rotation
+    float s = sin(kbRotation);
+    float c = cos(kbRotation);
+    mat2 rotMat = mat2(c, -s, s, c);
+    uvCentered = rotMat * uvCentered;
+
+    // Apply zoom (divide = zoom in)
+    uvCentered /= kbScale;
+
+    // Apply pan offset
+    uvCentered -= kbOffset / resolution;
+
+    // Convert back to UV space
+    vec2 transformedUV = uvCentered + vec2(0.5);
+    transformedUV = clamp(transformedUV, vec2(0.0), vec2(1.0));
+
+    // Now use transformed UV for all texture lookups!
     vec2 center = sphereCenter / resolution;
     float radius = sphereRadius / resolution.x;
 
-    vec2 delta = uv - center;
+    vec2 delta = transformedUV - center;
     float dist = length(delta);
 
-    // Simple crossfade
-    vec3 color1 = texture(tex1, uv).rgb;
-    vec3 color2 = texture(tex2, uv).rgb;
+    // Sample textures with transformed UV
+    vec3 color1 = texture(tex1, transformedUV).rgb;
+    vec3 color2 = texture(tex2, transformedUV).rgb;
     vec3 baseColor = mix(color1, color2, crossfade);
 
     // Crystal ball lens distortion
@@ -43,6 +80,7 @@ void main() {
         float aberration = 0.003 * normDist;  // Reduced from 0.008
         vec2 deltaDir = normalize(delta);
 
+        // sourceUV already has Ken Burns applied via transformedUV, use it directly
         vec3 color1_dist;
         color1_dist.r = texture(tex1, clamp(sourceUV - aberration * deltaDir, vec2(0.0), vec2(1.0))).r;
         color1_dist.g = texture(tex1, sourceUV).g;

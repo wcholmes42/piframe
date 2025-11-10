@@ -99,6 +99,11 @@ Item {
         property real strength: root.currentStrength
         property vector2d resolution: Qt.vector2d(width, height)
 
+        // Ken Burns uniforms - exposed from PhotoSlideshow
+        property real kbScale: 1.2 + 0.3 * Math.sin(root.time * 0.4)
+        property real kbRotation: 0.15 * Math.sin(root.time * 0.3)
+        property vector2d kbOffset: Qt.vector2d(Math.sin(root.time * 0.5) * 300, Math.sin(root.time * 0.6) * 300)
+
         // Compiled shaders for Qt 6
         vertexShader: "qrc:/shaders/crystalball.vert.qsb"
         fragmentShader: "qrc:/shaders/crystalball.frag.qsb"
