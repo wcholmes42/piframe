@@ -47,8 +47,8 @@ Item {
 
     // Z-depth bounce modulation - bouncy ball effect!
     property real bouncePhase: Math.abs(Math.sin(time * 1.2))  // Bounce frequency
-    property real currentRadius: 0.08 + 0.32 * bouncePhase * bouncePhase  // Shrinks to 0.08, bounces to 0.40!
-    property real pulsingStrength: 0.5 * Math.sin(time * 0.7)
+    property real currentRadius: 0.25  // Shrinks to 0.08, bounces to 0.40!
+    property real pulsingStrength: 0.0
 
     // Time animation - SLOWER for dramatic effect
     Timer {
@@ -64,22 +64,9 @@ Item {
 
     // Update sphere position using CHAOTIC Lissajous curves
     function updateSpherePosition() {
-        // CHAOTIC demoscene motion - more frequencies!
-        var lissajousX = Math.sin(time * freqX1) * 0.35
-                       + Math.sin(time * freqX2) * 0.25
-                       + Math.sin(time * 0.3) * 0.15  // Extra chaos
-
-        var lissajousY = Math.sin(time * freqY1) * 0.35
-                       + Math.sin(time * freqY2) * 0.25
-                       + Math.sin(time * 0.4) * 0.15  // Extra chaos
-
-        // Add some random-looking motion
-        lissajousX += Math.sin(time * 1.7) * 0.1
-        lissajousY += Math.sin(time * 1.9) * 0.1
-
-        // Map to screen coordinates - wider range for chaos
-        sphereCenterX = width * (0.5 + lissajousX * 0.6)
-        sphereCenterY = height * (0.5 + lissajousY * 0.6)
+        // FROZEN - ball stays centered, only Ken Burns moves the container
+        sphereCenterX = width * 0.5
+        sphereCenterY = height * 0.5
     }
 
     // Main shader effect
@@ -100,9 +87,9 @@ Item {
         property vector2d resolution: Qt.vector2d(width, height)
 
         // Ken Burns uniforms - REDUCED to prevent edge smearing
-        property real kbScale: 1.05 + 0.1 * Math.sin(root.time * 0.4)  // Subtle zoom (1.05-1.15x)
-        property real kbRotation: 0.05 * Math.sin(root.time * 0.3)  // Gentle rotation (±3°)
-        property vector2d kbOffset: Qt.vector2d(Math.sin(root.time * 0.5) * 80, Math.sin(root.time * 0.6) * 80)  // Small pan
+        property real kbScale: 1.0  // Subtle zoom (1.05-1.15x)
+        property real kbRotation: 0.0  // Gentle rotation (±3°)
+        property vector2d kbOffset: Qt.vector2d(0, 0)  // Small pan
 
         // Compiled shaders for Qt 6
         vertexShader: "qrc:/shaders/crystalball.vert.qsb"

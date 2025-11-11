@@ -54,12 +54,15 @@ Item {
         smooth: true
         asynchronous: true
         cache: true
-        autoTransform: true
+        autoTransform: false
         opacity: 0.0
+        scale: 1.0
+        x: 0
+        y: 0
         visible: false
 
         // NO transforms here - will be applied to ball shader output
-        layer.enabled: true
+        layer.enabled: false
         layer.smooth: true
 
         onStatusChanged: {
@@ -76,12 +79,15 @@ Item {
         smooth: true
         asynchronous: true
         cache: true
-        autoTransform: true
+        autoTransform: false
         opacity: 0.0
+        scale: 1.0
+        x: 0
+        y: 0
         visible: false
 
         // NO transforms here - will be applied to ball shader output
-        layer.enabled: true
+        layer.enabled: false
         layer.smooth: true
 
         onStatusChanged: {
@@ -141,220 +147,17 @@ Item {
     // Transition animation
     SequentialAnimation {
         id: transitionAnimation
-
         ParallelAnimation {
-            // Fade out current image (normal mode)
-            NumberAnimation {
-                target: currentImage
-                property: "opacity"
-                to: 0.0
-                duration: configManager.transitionDuration
-                easing.type: Easing.InOutQuad
-            }
-
-            // Fade in next image (normal mode)
-            NumberAnimation {
-                target: nextImage
-                property: "opacity"
-                to: 1.0
-                duration: configManager.transitionDuration
-                easing.type: Easing.InOutQuad
-            }
-
-            // Crystal ball crossfade (crystal ball mode)
-            NumberAnimation {
-                target: slideshow
-                property: "crystalBallCrossfade"
-                from: 0.0
-                to: 1.0
-                duration: configManager.transitionDuration
-                easing.type: Easing.InOutQuad
-            }
+            NumberAnimation { target: slideshow; property: "crystalBallCrossfade"; from: 0.0; to: 1.0; duration: configManager.transitionDuration; easing.type: Easing.InOutQuad }
         }
-
         ScriptAction {
             script: {
-                // Copy to currentImage (uses cache, instant)
-                currentImage.source = nextImage.source;
-                currentImage.opacity = 1.0;
-
-                // Reset nextImage for next photo
-                nextImage.opacity = 0.0;
-                nextImage.source = "";
-
-                // Reset crystal ball crossfade
-                crystalBallCrossfade = 0.0;
+                currentImage.source = nextImage.source
+                currentImage.opacity = 1.0
+                nextImage.opacity = 0.0
+                nextImage.source = ""
+                crystalBallCrossfade = 0.0
             }
-        }
-    }
-
-    // Slide transition (alternative)
-    SequentialAnimation {
-        id: slideTransition
-
-        ParallelAnimation {
-            // Slide current image out to left (normal mode)
-            NumberAnimation {
-                target: currentImage
-                property: "x"
-                from: 0
-                to: -slideshow.width
-                duration: configManager.transitionDuration
-                easing.type: Easing.InOutCubic
-            }
-
-            // Slide next image in from right (normal mode)
-            NumberAnimation {
-                target: nextImage
-                property: "x"
-                from: slideshow.width
-                to: 0
-                duration: configManager.transitionDuration
-                easing.type: Easing.InOutCubic
-            }
-
-            // Fade animations for smoother look (normal mode)
-            NumberAnimation {
-                target: currentImage
-                property: "opacity"
-                to: 0.0
-                duration: configManager.transitionDuration / 2
-            }
-
-            NumberAnimation {
-                target: nextImage
-                property: "opacity"
-                to: 1.0
-                duration: configManager.transitionDuration / 2
-            }
-
-            // Crystal ball crossfade (crystal ball mode)
-            NumberAnimation {
-                target: slideshow
-                property: "crystalBallCrossfade"
-                from: 0.0
-                to: 1.0
-                duration: configManager.transitionDuration
-                easing.type: Easing.InOutQuad
-            }
-        }
-
-        ScriptAction {
-            script: {
-                // Reset positions
-                currentImage.x = 0;
-                nextImage.x = 0;
-
-                // Copy to currentImage (uses cache)
-                currentImage.source = nextImage.source;
-                currentImage.opacity = 1.0;
-
-                // Reset nextImage
-                nextImage.opacity = 0.0;
-                nextImage.source = "";
-
-                // Reset crystal ball crossfade
-                crystalBallCrossfade = 0.0;
-            }
-        }
-    }
-
-    // Zoom transition (alternative)
-    SequentialAnimation {
-        id: zoomTransition
-
-        ParallelAnimation {
-            // Zoom out current image (normal mode)
-            NumberAnimation {
-                target: currentImage
-                property: "scale"
-                from: 1.0
-                to: 0.8
-                duration: configManager.transitionDuration
-                easing.type: Easing.InOutQuad
-            }
-
-            NumberAnimation {
-                target: currentImage
-                property: "opacity"
-                to: 0.0
-                duration: configManager.transitionDuration
-            }
-
-            // Zoom in next image (normal mode)
-            NumberAnimation {
-                target: nextImage
-                property: "scale"
-                from: 1.2
-                to: 1.0
-                duration: configManager.transitionDuration
-                easing.type: Easing.InOutQuad
-            }
-
-            NumberAnimation {
-                target: nextImage
-                property: "opacity"
-                to: 1.0
-                duration: configManager.transitionDuration
-            }
-
-            // Crystal ball crossfade (crystal ball mode)
-            NumberAnimation {
-                target: slideshow
-                property: "crystalBallCrossfade"
-                from: 0.0
-                to: 1.0
-                duration: configManager.transitionDuration
-                easing.type: Easing.InOutQuad
-            }
-        }
-
-        ScriptAction {
-            script: {
-                // Reset scale
-                currentImage.scale = 1.0;
-                nextImage.scale = 1.0;
-
-                // Copy to currentImage (uses cache)
-                currentImage.source = nextImage.source;
-                currentImage.opacity = 1.0;
-
-                // Reset nextImage
-                nextImage.opacity = 0.0;
-                nextImage.source = "";
-
-                // Reset crystal ball crossfade
-                crystalBallCrossfade = 0.0;
-            }
-        }
-    }
-
-    // Loading indicator (disabled - images load fast enough)
-    Rectangle {
-        id: loadingIndicator
-        anchors.centerIn: parent
-        width: 100
-        height: 100
-        radius: 50
-        color: "#40FFFFFF"
-        visible: false  // Disabled - no more loading spinner
-
-        RotationAnimation on rotation {
-            loops: Animation.Infinite
-            from: 0
-            to: 360
-            duration: 1000
-            running: loadingIndicator.visible
-        }
-
-        Rectangle {
-            width: 20
-            height: 20
-            radius: 10
-            color: "white"
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.topMargin: 10
         }
     }
 
