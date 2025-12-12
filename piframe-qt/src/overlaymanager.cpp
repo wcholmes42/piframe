@@ -98,34 +98,25 @@ void OverlayManager::setDominantColor(const QColor &color)
 
 void OverlayManager::calculateAdaptiveColors()
 {
-    // MAXIMUM CONTRAST - ALWAYS READABLE!
-    float h, s, v;
-    m_dominantColor.getHsvF(&h, &s, &v);
-
+    // Simple brightness-based contrast - avoids hard-to-read colors like pink/purple
     QColor newTextColor;
     QColor newOutlineColor;
 
-    // Calculate COMPLEMENTARY color for text
-    float complementaryHue = h + 0.5f;
-    if (complementaryHue > 1.0f) complementaryHue -= 1.0f;
+    // Use background brightness to decide: light or dark text
+    // Dark backgrounds (< 0.5) get light text, bright backgrounds get dark text
+    if (m_backgroundBrightness < 0.45f) {
+        // Dark background - use warm white/cream (easy to read, no pink/purple)
+        newTextColor = QColor::fromHsvF(0.12f, 0.08f, 0.95f);  // Warm white
+    } else if (m_backgroundBrightness < 0.65f) {
+        // Medium background - use off-white with slight cyan tint
+        newTextColor = QColor::fromHsvF(0.55f, 0.12f, 0.92f);  // Light cyan-white
+    } else {
+        // Bright background - use dark charcoal (not pure black)
+        newTextColor = QColor::fromHsvF(0.6f, 0.15f, 0.18f);  // Dark blue-gray
+    }
 
-    // Text brightness - SIMPLE INVERSION
-    float textValue = 1.0f - m_backgroundBrightness;
-    textValue = qBound(0.35f, textValue, 0.98f);
-
-    // High saturation for vibrant text
-    float textSaturation = 0.88f;
-
-    newTextColor = QColor::fromHsvF(complementaryHue, textSaturation, textValue);
-
-    // Outline: Use ORIGINAL hue (NOT complementary) for maximum separation
-    // Plus OPPOSITE brightness from text
-    float outlineHue = h;  // Use original photo color for outline
-    float outlineValue = m_backgroundBrightness;  // Match background brightness
-    outlineValue = qBound(0.05f, outlineValue, 0.75f);
-
-    // Low saturation outline - acts as shadow
-    newOutlineColor = QColor::fromHsvF(outlineHue, 0.2f, outlineValue);
+    // Outline is always black for consistent contrast
+    newOutlineColor = Qt::black;
 
     if (m_adaptiveTextColor != newTextColor) {
         m_adaptiveTextColor = newTextColor;

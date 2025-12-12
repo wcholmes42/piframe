@@ -27,10 +27,10 @@ Item {
         autoTransform: true
         opacity: 1.0
 
-        // Medium Ken Burns - between subtle and dramatic
-        // Scale: 1.0x to 1.12x
-        // Rotation: -3 to +3 degrees
-        scale: 1.06 + 0.06 * Math.sin(kbTime * 0.15)
+        // Ken Burns - ensures image always covers screen at max rotation
+        // For 3° rotation on 16:9, need min scale ~1.10 to cover corners
+        // Scale: 1.12x to 1.18x, Rotation: -3 to +3 degrees
+        scale: 1.15 + 0.03 * Math.sin(kbTime * 0.15)
         rotation: 3 * Math.sin(kbTime * 0.12)
     }
 
@@ -45,7 +45,7 @@ Item {
         opacity: 0.0
 
         // Same Ken Burns effect
-        scale: 1.06 + 0.06 * Math.sin(kbTime * 0.15)
+        scale: 1.15 + 0.03 * Math.sin(kbTime * 0.15)
         rotation: 3 * Math.sin(kbTime * 0.12)
     }
 
