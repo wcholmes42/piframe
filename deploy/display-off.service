@@ -1,0 +1,10 @@
+[Unit]
+Description=Turn display off (bedroom safe)
+
+[Service]
+Type=oneshot
+# Try DDC first, then fallback methods
+ExecStart=/bin/bash -c 'ddcutil setvcp d6 4 2>/dev/null || ddcutil setvcp d6 5 2>/dev/null || true'
+# Double-tap after 5 seconds to ensure it sticks
+ExecStartPost=/bin/sleep 5
+ExecStartPost=/bin/bash -c 'ddcutil setvcp d6 4 2>/dev/null || true'
