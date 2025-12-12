@@ -27,9 +27,11 @@ Item {
         autoTransform: true
         opacity: 1.0
 
-        // Smooth Ken Burns using sine waves (no abrupt resets)
-        scale: 1.1 + 0.15 * Math.sin(kbTime * 0.3)
-        rotation: 5 * Math.sin(kbTime * 0.2)
+        // Medium Ken Burns - between subtle and dramatic
+        // Scale: 1.0x to 1.12x
+        // Rotation: -3 to +3 degrees
+        scale: 1.06 + 0.06 * Math.sin(kbTime * 0.15)
+        rotation: 3 * Math.sin(kbTime * 0.12)
     }
 
     Image {
@@ -43,8 +45,8 @@ Item {
         opacity: 0.0
 
         // Same Ken Burns effect
-        scale: 1.1 + 0.15 * Math.sin(kbTime * 0.3)
-        rotation: 5 * Math.sin(kbTime * 0.2)
+        scale: 1.06 + 0.06 * Math.sin(kbTime * 0.15)
+        rotation: 3 * Math.sin(kbTime * 0.12)
     }
 
     SequentialAnimation {

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<labwc_config>
+  <core>
+    <decoration>no</decoration>
+    <gap>0</gap>
+  </core>
+
+  <theme>
+    <cornerRadius>0</cornerRadius>
+  </theme>
+
+  <!-- Hide cursor immediately -->
+  <cursor>
+    <hide>0</hide>
+  </cursor>
+
+  <!-- Make all windows fullscreen -->
+  <windowRules>
+    <windowRule identifier="*">
+      <action name="ToggleFullscreen"/>
+    </windowRule>
+  </windowRules>
+
+  <!-- Disable all keybindings except emergency exit -->
+  <keyboard>
+    <keybind key="C-A-Escape">
+      <action name="Exit"/>
+    </keybind>
+  </keyboard>
+
+  <!-- Disable mouse bindings -->
+  <mouse>
+    <context name="Root">
+    </context>
+  </mouse>
+</labwc_config>
