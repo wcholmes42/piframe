@@ -1,0 +1,23 @@
+[Unit]
+Description=PiFrame Qt Digital Photo Frame
+After=network.target local-fs.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/piframe-qt
+Environment="QT_QPA_PLATFORM=eglfs"
+Environment="QT_QPA_EGLFS_PHYSICAL_WIDTH=600"
+Environment="QT_QPA_EGLFS_PHYSICAL_HEIGHT=340"
+Environment="QT_QPA_EGLFS_HIDECURSOR=1"
+ExecStart=/opt/piframe-qt/piframe-qt --config /opt/piframe-qt/config/config.json
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+StandardInput=tty
+TTYPath=/dev/tty1
+TTYReset=yes
+
+[Install]
+WantedBy=multi-user.target
