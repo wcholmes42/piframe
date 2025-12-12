@@ -1,0 +1,210 @@
+================================================================================
+                        PIFRAME V2.0 - TECHNICAL SPECIFICATION
+                           Digital Photo Frame for Raspberry Pi 4B
+================================================================================
+
+PROJECT SUMMARY
+---------------
+A Qt6/QML-based digital photo frame application with smooth Ken Burns effect,
+adaptive clock overlay, and DDC-based display scheduling. Designed for
+"set and forget" bedroom deployment.
+
+HARDWARE
+--------
+- Raspberry Pi 4B (4GB)
+- Dell AW2725DM 27" Monitor (2560x1440 @ 60Hz)
+- HDMI connection to HDMI-A-1
+- Photos stored on network share (Unraid) synced to /mnt/photos
+
+SOFTWARE STACK
+--------------
+- OS: Debian Trixie (testing) - aarch64
+- Display: Qt6 EGLFS (direct framebuffer, no compositor)
+- Framework: Qt 6.x with QML
+- Build: qmake6 + make
+- Service Management: systemd
+- Display Control: ddcutil via DDC/CI over I2C
+- Time Sync: systemd-timesyncd (NTP)
+
+================================================================================
+                              THE JOURNEY
+================================================================================
+
+PHASE 1: THE WAYLAND NIGHTMARE
+------------------------------
+Initial approach used labwc Wayland compositor. Multiple issues:
+- Cursor refused to hide (tried rc.xml, WLR_NO_HARDWARE_CURSORS, empty themes)
+- unclutter-xfixes caused segfault
+- Complex multi-service architecture
+
+BREAKTHROUGH: Switched to EGLFS mode - direct GPU framebuffer rendering
+- QT_QPA_PLATFORM=eglfs
+- QT_QPA_EGLFS_HIDECURSOR=1
+- Single service, no compositor needed
+- Cursor finally gone!
+
+PHASE 2: KEN BURNS EFFECT TUNING
+--------------------------------
+Problem: Original NumberAnimation with loops caused jarring resets
+Solution: Continuous sine wave animation using shared time variable
+
+Evolution:
+1. Dramatic (too much): scale 0.95-1.25x, rotation +/-5 degrees
+2. Subtle (too little): scale 0.99-1.05x, rotation +/-1.5 degrees
+3. Medium (just right): scale 1.0-1.12x, rotation +/-3 degrees
+4. Final (no edge exposure): scale 1.12-1.18x, rotation +/-3 degrees
+
+Key insight: Both images share same kbTime variable, so animation is
+continuous across photo transitions - no jumps when photos change.
+
+Math for full-screen coverage at 3 degree rotation:
+- 16:9 aspect ratio rotated 3 degrees needs ~1.10x minimum scale
+- We use 1.12x minimum (1.15 - 0.03) for safety margin
+
+PHASE 3: CLOCK OVERLAY
+----------------------
+Problem: Complementary color algorithm produced hard-to-read pinks/purples
+Solution: Simplified brightness-based color selection
+
+Final algorithm:
+- Dark background (< 0.45): Warm white text (HSV: 0.12, 0.08, 0.95)
+- Medium background (0.45-0.65): Cyan-white text (HSV: 0.55, 0.12, 0.92)
+- Bright background (> 0.65): Dark charcoal text (HSV: 0.6, 0.15, 0.18)
+- Outline: Always black for consistent contrast
+
+PHASE 4: DISPLAY POWER CONTROL
+------------------------------
+Problem: vcgencmd display_power doesn't work on Pi 4 with KMS/DRM driver
+Problem: DPMS via modetest leaves signal active (black screen, not standby)
+Solution: DDC/CI control via ddcutil
+
+Commands:
+- Display OFF: ddcutil setvcp d6 4
+- Display ON:  ddcutil setvcp d6 1
+
+Monitor enters true standby mode (no signal, power LED changes).
+
+PHASE 5: BEDROOM-PROOF SCHEDULING
+---------------------------------
+Systemd timers for automatic on/off:
+- display-on.timer:  8:00 AM daily
+- display-off.timer: 8:00 PM daily
+
+display-off.service includes double-tap (retry after 5 seconds) for reliability.
+Smart plug recommended as belt-and-suspenders backup (off at 8:02 PM).
+
+================================================================================
+                          FINAL CONFIGURATION
+================================================================================
+
+KEY FILES ON PI (/opt/piframe-qt/)
+----------------------------------
+piframe-qt              - Main executable
+config/config.json      - Configuration file
+qml/PhotoSlideshow.qml  - Slideshow with Ken Burns
+qml/ClockOverlay.qml    - Adaptive clock overlay
+qml/main.qml            - Main window
+
+SYSTEMD SERVICES
+----------------
+/etc/systemd/system/piframe-qt.service    - Main application
+/etc/systemd/system/display-on.service    - Turn display on
+/etc/systemd/system/display-off.service   - Turn display off
+/etc/systemd/system/display-on.timer      - 8 AM schedule
+/etc/systemd/system/display-off.timer     - 8 PM schedule
+
+ENVIRONMENT VARIABLES (in piframe-qt.service)
+---------------------------------------------
+QT_QPA_PLATFORM=eglfs
+QT_QPA_EGLFS_PHYSICAL_WIDTH=600
+QT_QPA_EGLFS_PHYSICAL_HEIGHT=340
+QT_QPA_EGLFS_HIDECURSOR=1
+
+CONFIG.JSON KEY SETTINGS
+------------------------
+{
+  "slideshow": {
+    "interval_seconds": 20,
+    "transition_duration_ms": 1000,
+    "shuffle": true,
+    "photo_source": "/mnt/photos"
+  }
+}
+
+KEN BURNS PARAMETERS (PhotoSlideshow.qml)
+-----------------------------------------
+scale: 1.15 + 0.03 * Math.sin(kbTime * 0.15)    // 1.12x to 1.18x
+rotation: 3 * Math.sin(kbTime * 0.12)            // -3 to +3 degrees
+Timer interval: 33ms (~30fps)
+
+USEFUL COMMANDS
+---------------
+# Manual display control
+piframe-display on
+piframe-display off
+
+# Or via systemctl
+systemctl start display-on
+systemctl start display-off
+
+# Check timers
+systemctl list-timers display-*
+
+# Restart slideshow
+systemctl restart piframe-qt
+
+# View logs
+journalctl -u piframe-qt -f
+
+================================================================================
+                              LESSONS LEARNED
+================================================================================
+
+1. EGLFS > Wayland for single-app kiosk displays
+   - Simpler, faster, no compositor overhead
+   - Native cursor hiding actually works
+
+2. Sine waves > Animation loops for continuous effects
+   - No reset jumps, smooth and organic
+   - Shared time variable = seamless transitions
+
+3. DDC/CI is the proper way to control monitor power
+   - Works when DPMS and vcgencmd fail
+   - True standby, not just black screen
+
+4. Keep clock colors simple
+   - Brightness-based selection beats color theory
+   - Avoid pink/purple - human eyes struggle with them
+
+5. Double-tap critical operations
+   - DDC commands can fail silently
+   - Retry after delay ensures reliability
+
+================================================================================
+                              VERSION HISTORY
+================================================================================
+
+v1.0 - Initial stable release
+     - Ken Burns effect (medium intensity)
+     - Adaptive clock with black outline
+     - EGLFS mode (no cursor)
+
+v2.0 - Bedroom-proof release
+     - DDC display scheduling (8am-8pm)
+     - Double-tap display-off for reliability
+     - NTP time sync verified
+     - Test image cleanup
+
+================================================================================
+                         REPOSITORY
+================================================================================
+
+GitHub: https://github.com/wcholmes42/piframe.git
+
+Tags:
+- v1.0: Basic functionality
+- v2.0: Display scheduling
+
+================================================================================
+                    "Glance and it's static. Focus and it moves."
+================================================================================
